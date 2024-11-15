@@ -15,6 +15,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (localStorage.getItem('students')) {
         students = JSON.parse(localStorage.getItem('students'));
         console.log('Loaded students:', students);
+        // Update the total number of students
+        document.getElementById('totalPupils').textContent = `${students.length}`;
         updateTable();
     }
 
@@ -203,21 +205,6 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-
-// Add event listener for the search functionality (auto-complete)
-const searchInput = document.getElementById('searchInput');
-const resetSearch = document.getElementById('resetSearch');
-
-searchInput.addEventListener('input', function () {
-    const query = searchInput.value.toLowerCase().trim();
-    filterTable(query);
-});
-
-resetSearch.addEventListener('click', function () {
-    searchInput.value = ''; // Clear the search input
-    filterTable(''); // Reset the table to show all students
-});
-
 // Function to filter the table based on the search query
 function filterTable(query) {
     const tableRows = dataTable.getElementsByTagName('tr');
@@ -238,22 +225,30 @@ function filterTable(query) {
     }
 }
 
+function getCurrentWeek() {
+    // Set the reset date for Week 1 (18th November 2023)
+    const resetDate = new Date('2023-11-18');
+    const today = new Date();
 
-
-document.addEventListener('DOMContentLoaded', () => {
-    const { jsPDF } = window.jspdf;
-
-    // After loading students from localStorage, update the home page
-    if (localStorage.getItem('students')) {
-        students = JSON.parse(localStorage.getItem('students'));
-        updateTable();
-
-        // Update the total number of students
-        document.getElementById('totalStudents').textContent = `Total Students: ${students.length}`;
-
-        // Assuming you have a week variable set somewhere
-        const currentWeek = getCurrentWeek(); // replace with your actual method to get the week
-        document.getElementById('currentWeek').textContent = `Week: ${currentWeek}`;
+    // If today is before the reset date, calculate the week before reset
+    if (today < resetDate) {
+        // Find the difference between today and resetDate in days
+        const daysUntilReset = Math.floor((resetDate - today) / (1000 * 60 * 60 * 24));
+        
+        // Determine the current week in reverse (Week 3, Week 2, Week 1)
+        const weeksBeforeReset = 3 - (Math.floor(daysUntilReset / 7) % 3);
+        return `Week: ${weeksBeforeReset}`;
+    } else {
+        // Calculate the difference in days after the reset date
+        const daysSinceReset = Math.floor((today - resetDate) / (1000 * 60 * 60 * 24));
+        
+        // Calculate the current week in the 3-week rotation after reset date
+        const currentWeek = ((Math.floor(daysSinceReset / 7) % 3) + 1);
+        return `Week: ${currentWeek}`;
     }
+}
 
+// Display the current week under the element with id 'currentWeek'
+document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('currentWeek').textContent = getCurrentWeek();
 });
