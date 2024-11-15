@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fridays Lunches</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="logo">
+            <a href="#">Lunch Management System</a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#" class="nav-link" data-target="home">Home</a></li>
+            <li><a href="#" class="nav-link" data-target="packed-lunches">Packed Lunches</a></li>
+        </ul>
+        <div class="menu-icon" id="menu-icon">
+            <span>&#9776;</span>
+        </div>
+    </nav>
+
+    <!-- Main Content Section -->
+    <!-- Home page content -->
+    <div id="home" class="container">
+        <h1>Welcome to Pine Green Primary's LMS</h1>
+        <p>You can use this for all your lunch management needs.</p>
+        
+        <!-- Dashboard container -->
+        <div id="dashboard" class="dashboard">
+            <!-- Card for the number of pupils in the packed lunch table -->
+            <div class="dashboard-card">
+                <h3>Total Pupils in Packed Lunch Table</h3>
+                <p id="totalPupils">0</p>
+            </div>
+            
+            <!-- Card for the current menu week -->
+            <div class="dashboard-card">
+                <h3>Current Menu Week</h3>
+                <p id="currentWeek">Loading...</p>
+            </div>
+
+            <!-- Placeholder for future information -->
+            <div class="dashboard-card">
+                <h3>Additional Information</h3>
+                <p>This section will display more details soon.</p>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" id="packed-lunches" style="display: none;">
+        <h1>Packed Lunch Labels</h1>
+
+        <!-- Input Form -->
+        <form id="lunchForm">
+            <div class="input-group">
+                <label for="name">Student Name:</label>
+                <input type="text" id="name" required>
+            </div>
+            <div class="input-group">
+                <label for="lunchDetails">Lunch Details:</label>
+                <textarea id="lunchDetails" rows="3" required></textarea>
+            </div>
+            <button type="submit">Add to List</button>
+            <!-- Generate Labels Button -->
+            <button id="generateLabels">Generate Label Sheet</button>
+        </form>
+
+        
+
+
+        <!-- Data Table -->
+        <!--
+        <div>
+            <div class="input-group" class="margin-top: 15px;">
+                <input type="text" id="searchInput" placeholder="Search students..." />
+            </div>
+        </div> -->
+
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Lunch Details</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+
+        <div>
+            <button id="prevPage" disabled>Previous</button>
+            <span id="pageIdentifier">Page 1 of 1</span>
+            <button id="nextPage" disabled>Next</button>
+        </div>        
+
+    </div>
+
+    <!-- Import jsPDF from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
