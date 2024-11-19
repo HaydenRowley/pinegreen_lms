@@ -45,32 +45,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Function to update table (for the current page)
     function updateTable() {
-        dataTable.innerHTML = ''; // Clear the table first
-
-        // Calculate total pages
+        dataTable.innerHTML = ''; // Clear existing rows
         const totalPages = Math.ceil(students.length / rowsPerPage);
-
-        // Ensure current page is within bounds
-        if (currentPage >= totalPages) {
-            currentPage = totalPages - 1;
-        }
-        if (currentPage < 0) {
-            currentPage = 0;
-        }
-
-        // Calculate the start and end indices for the current page
         const startIndex = currentPage * rowsPerPage;
         const endIndex = Math.min(startIndex + rowsPerPage, students.length);
-
-        // Loop through students on the current page
+    
         for (let i = startIndex; i < endIndex; i++) {
             const student = students[i];
             const row = dataTable.insertRow();
             row.insertCell(0).textContent = student.name;
             row.insertCell(1).textContent = student.lunchDetails;
-
-            // Create a cell for the Edit and Delete buttons
+        
             const actionCell = row.insertCell(2);
+            
             const editButton = document.createElement('button');
             editButton.textContent = 'Edit';
             editButton.onclick = () => {
@@ -78,7 +65,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.getElementById('lunchDetails').value = student.lunchDetails;
                 lunchForm.dataset.editingIndex = i;
             };
-
+            
             const deleteButton = document.createElement('button');
             deleteButton.textContent = 'Delete';
             deleteButton.onclick = () => {
@@ -86,19 +73,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 localStorage.setItem('students', JSON.stringify(students));
                 updateTable();
             };
-
+        
+            // Append the buttons with space between them
             actionCell.appendChild(editButton);
+            actionCell.appendChild(document.createTextNode(' ')); // This adds a space between buttons
             actionCell.appendChild(deleteButton);
-            editButton.style.marginRight = '5px';
         }
-
-        // Update pagination controls and page identifier
-        const pageIdentifier = document.getElementById('pageIdentifier');
-        pageIdentifier.textContent = `Page ${currentPage + 1} of ${totalPages}`;
-
+        
+    
+        document.getElementById('pageIdentifier').textContent = `Page ${currentPage + 1} of ${totalPages}`;
         document.getElementById('prevPage').disabled = currentPage === 0;
         document.getElementById('nextPage').disabled = currentPage >= totalPages - 1;
     }
+    
 
     // Function to change page (Next or Previous)
     function changePage(direction) {
@@ -203,6 +190,81 @@ document.addEventListener('DOMContentLoaded', () => {
     menuIcon.addEventListener('click', () => {
         navbar.classList.toggle('active');
     });
+
+    const weekOneSection = document.getElementById('weekOne');
+    const weekOneTable = document.getElementById('weekOneTable').getElementsByTagName('tbody')[0];
+    const addWeekOneButton = document.getElementById('addWeekOne');
+
+    function renderWeekOne() {
+        weekOneTable.innerHTML = ''; // Clear previous rows
+    
+        students.forEach((student, index) => {
+            const row = weekOneTable.insertRow();
+            row.insertCell(0).textContent = student.name;
+    
+            // Add textarea fields for each day
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+                const cell = row.insertCell();
+                const textarea = document.createElement('textarea');
+                textarea.value = student[day] || ''; // Set the current value or default to empty
+                textarea.dataset.day = day;
+                textarea.dataset.index = index;
+    
+                // Style the textarea
+                textarea.rows = 3; // Set the visible number of rows
+                textarea.style.width = '100%'; // Stretch to fit the cell
+                textarea.style.resize = 'none'; // Allow vertical resizing only
+                textarea.style.padding = '5px';
+                textarea.style.boxSizing = 'border-box'; // Prevent overflow
+                textarea.style.fontFamily = 'Arial, sans-serif';
+                textarea.style.fontSize = '14px';
+    
+                // Save changes to localStorage on input
+                textarea.addEventListener('input', (event) => {
+                    const day = event.target.dataset.day;
+                    const studentIndex = event.target.dataset.index;
+                    students[studentIndex][day] = event.target.value;
+                    localStorage.setItem('students', JSON.stringify(students)); // Save updated data
+                });
+    
+                cell.appendChild(textarea);
+            });
+    
+            // Add delete button
+            const actionCell = row.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = () => {
+                students.splice(index, 1); // Remove the student
+                localStorage.setItem('students', JSON.stringify(students));
+                renderWeekOne(); // Re-render the table
+            };
+            actionCell.appendChild(deleteButton);
+        });
+    }
+    
+
+    function handleLunchEdit(event) {
+        const index = event.target.dataset.index;
+        const day = event.target.dataset.day;
+        students[index][day] = event.target.value;
+        localStorage.setItem('students', JSON.stringify(students));
+    }
+
+    
+
+    // Navigation to Week One
+    navLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+            const target = event.target.dataset.target;
+            sections.forEach(section => section.style.display = 'none');
+            document.getElementById(target).style.display = 'block';
+
+            if (target === 'weekOne') {
+                renderWeekOne();
+            }
+        });
+    });
 });
 
 // Function to filter the table based on the search query
@@ -252,3 +314,10 @@ function getCurrentWeek() {
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('currentWeek').textContent = getCurrentWeek();
 });
+
+document.addEventListener('DOMContentLoaded', () => {
+    const savedStudents = JSON.parse(localStorage.getItem('students')) || [];
+    students = savedStudents;
+    updateTable();
+});
+
