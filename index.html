@@ -14,6 +14,7 @@
         </div>
         <ul class="nav-links">
             <li><a href="#" class="nav-link" data-target="home">Home</a></li>
+            <li><a href="#" class="nav-link" data-target="profilePage">Pupil Profiles</a></li>
             <li><a href="#" class="nav-link" data-target="weekOne">Week One</a></li>
             <li><a href="#" class="nav-link" data-target="packed-lunches">Packed Lunches</a></li>
         </ul>
@@ -99,7 +100,11 @@
 
     </div>
 
+    <!-- Week One Page -->
+
     <div id="weekOne" class="container" style="display:none;">
+        <h1>Week One Lunches</h1>
+        <div id="tallyContainer" style="margin-top: 20px;"></div>
         <table id="weekOneTable">
             <thead>
                 <tr>
@@ -115,6 +120,21 @@
             </tbody>
         </table>
         
+    </div>
+    
+    <!-- Profile Pages -->
+    <div id="profilePage" class="container" style="display: none;">
+        <h2>Pupil Profiles</h2>
+        <div id="profileContainer" class="profile-container"></div>
+    
+        <!-- Popup Modal -->
+        <div id="popup" class="popup" style="display: none;">
+            <div class="popup-content">
+                <span id="closePopup" class="close">&times;</span>
+                <h3 id="popupName"></h3>
+                <p id="popupDetails"></p>
+            </div>
+        </div>
     </div>
     
 

@@ -265,6 +265,36 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     });
+
+    function renderProfiles() {
+        const profilesContainer = document.getElementById('profilesContainer');
+        profilesContainer.innerHTML = ''; // Clear previous content
+    
+        students.forEach((student, index) => {
+            // Create a profile box for each pupil
+            const profileBox = document.createElement('div');
+            profileBox.className = 'profile-box';
+            profileBox.innerHTML = `
+                <h3>${student.name}</h3>
+                <button class="view-choices" data-index="${index}">View Dinner Choices</button>
+            `;
+            profilesContainer.appendChild(profileBox);
+        });
+    
+        // Add event listeners to "View Dinner Choices" buttons
+        document.querySelectorAll('.view-choices').forEach(button => {
+            button.addEventListener('click', (event) => {
+                const index = event.target.dataset.index;
+                showDinnerChoices(index);
+            });
+        });
+    }
+    
+    function showDinnerChoices(index) {
+        const student = students[index];
+        alert(`Dinner choices for ${student.name}:\n\n${JSON.stringify(student, null, 2)}`);
+    }
+    
 });
 
 // Function to filter the table based on the search query
@@ -319,5 +349,52 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedStudents = JSON.parse(localStorage.getItem('students')) || [];
     students = savedStudents;
     updateTable();
+});
+
+// Profile Pages
+document.addEventListener('DOMContentLoaded', () => {
+    const profileContainer = document.getElementById('profileContainer');
+    const popup = document.getElementById('popup');
+    const popupName = document.getElementById('popupName');
+    const popupDetails = document.getElementById('popupDetails');
+    const closePopup = document.getElementById('closePopup');
+
+    // Render pupil profiles
+    function renderProfiles() {
+        profileContainer.innerHTML = ''; // Clear previous profiles
+
+        students.forEach((student, index) => {
+            // Create a profile box
+            const profileBox = document.createElement('div');
+            profileBox.className = 'profile-box';
+            profileBox.textContent = student.name;
+
+            // Add click event to show popup
+            profileBox.addEventListener('click', () => {
+                popupName.textContent = student.name;
+                popupDetails.textContent = `Lunch Details: ${student.lunchDetails}`;
+                popup.style.display = 'block';
+            });
+
+            profileContainer.appendChild(profileBox);
+        });
+    }
+
+    // Close the popup
+    closePopup.addEventListener('click', () => {
+        popup.style.display = 'none';
+    });
+
+    // Show profiles when navigating to the profile page
+    const navLinks = document.querySelectorAll('.nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+            const target = event.target.dataset.target;
+
+            if (target === 'profilePage') {
+                renderProfiles();
+            }
+        });
+    });
 });
 
