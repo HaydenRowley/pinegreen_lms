@@ -17,6 +17,7 @@
             <li><a href="#" class="nav-link" data-target="profilePage">Pupil Profiles</a></li>
             <li><a href="#" class="nav-link" data-target="weekOne">Week One</a></li>
             <li><a href="#" class="nav-link" data-target="packed-lunches">Packed Lunches</a></li>
+            <li><a href="#" class="nav-link" data-target="admin">Admin</a></li>
         </ul>
         <div class="menu-icon" id="menu-icon">
             <span>&#9776;</span>
@@ -104,7 +105,23 @@
 
     <div id="weekOne" class="container" style="display:none;">
         <h1>Week One Lunches</h1>
-        <div id="tallyContainer" style="margin-top: 20px;"></div>
+
+        <!-- Tally Section -->
+        <div id="tallyContainer" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+            <h2>Live Tally</h2>
+        </div>
+        <button id="printTallyButton" style="margin: 20px 0; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #4caf50; color: white; border: none; border-radius: 5px;">
+            Print Tally
+        </button>
+
+        <!-- Search Bar -->
+        <input
+            type="text"
+            id="searchInput"
+            placeholder="Search for a child's name..."
+            style="width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 5px; margin-bottom: 20px;"
+        />
+                
         <table id="weekOneTable">
             <thead>
                 <tr>
@@ -119,8 +136,9 @@
             <tbody>
             </tbody>
         </table>
-        
     </div>
+    
+    
     
     <!-- Profile Pages -->
     <div id="profilePage" class="container" style="display: none;">
@@ -134,6 +152,77 @@
                 <h3 id="popupName"></h3>
                 <p id="popupDetails"></p>
             </div>
+        </div>
+    </div>
+
+    <!-- Admin -->
+    <div id="admin" class="container" style="display:none;">
+        <h1>Admin - Customize Menus</h1>
+
+        <!-- Week 1 Section -->
+        <div class="menu-section">
+            <h2>Week 1</h2>
+            <div class="menu-days">
+                <div class="day-menu">
+                    <h3>Monday</h3>
+                    <label for="week1MondayMains">Mains:</label>
+                    <input type="text" id="week1MondayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week1MondayDesserts">Desserts:</label>
+                    <input type="text" id="week1MondayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <!-- Repeat for other days -->
+                <div class="day-menu">
+                    <h3>Tuesday</h3>
+                    <label for="week1TuesdayMains">Mains:</label>
+                    <input type="text" id="week1TuesdayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week1TuesdayDesserts">Desserts:</label>
+                    <input type="text" id="week1TuesdayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <div class="day-menu">
+                    <h3>Wednesday</h3>
+                    <label for="week1WednesdayMains">Mains:</label>
+                    <input type="text" id="week1WednesdayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week1WednesdayDesserts">Desserts:</label>
+                    <input type="text" id="week1WednesdayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <div class="day-menu">
+                    <h3>Thursday</h3>
+                    <label for="week1ThursdayMains">Mains:</label>
+                    <input type="text" id="week1ThursdayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week1ThursdayDesserts">Desserts:</label>
+                    <input type="text" id="week1ThursdayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+            </div>
+            <button class="save-button" onclick="saveMenu('week1')">Save Week 1 Menu</button>
+        </div>
+
+        <!-- Repeat for Week 2 and Week 3 -->
+        <div class="menu-section">
+            <h2>Week 2</h2>
+            <div class="menu-days">
+                <div class="day-menu">
+                    <h3>Monday</h3>
+                    <label for="week2MondayMains">Mains:</label>
+                    <input type="text" id="week2MondayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week2MondayDesserts">Desserts:</label>
+                    <input type="text" id="week2MondayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+            </div>
+            <button class="save-button" onclick="saveMenu('week2')">Save Week 2 Menu</button>
+        </div>
+
+        <div class="menu-section">
+            <h2>Week 3</h2>
+            <div class="menu-days">
+                <div class="day-menu">
+                    <h3>Monday</h3>
+                    <label for="week3MondayMains">Mains:</label>
+                    <input type="text" id="week3MondayMains" placeholder="Enter mains, comma-separated">
+                    <label for="week3MondayDesserts">Desserts:</label>
+                    <input type="text" id="week3MondayDesserts" placeholder="Enter desserts, comma-separated">
+                </div>
+            </div>
+            <button class="save-button" onclick="saveMenu('week3')">Save Week 3 Menu</button>
         </div>
     </div>
     
