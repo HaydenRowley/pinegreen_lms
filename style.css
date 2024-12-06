@@ -241,41 +241,94 @@ td {
     transform: scale(1.05);
 }
 
+/* Popup Container */
 .popup {
+    display: none;
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
-    display: flex;
-    justify-content: center; /* Horizontal centering */
-    align-items: center; /* Vertical centering */
-    z-index: 1000; /* Ensure it appears above all other content */
-}
-
-.popup-content {
-    position: relative;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 80%;
-    max-width: 500px;
-    text-align: center;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.25); /* Adds shadow for a pop-out effect */
-    transform: translate(-50%, -50%);
     top: 50%;
     left: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    border-radius: 10px;
+    width: 400px;
+    z-index: 1000;
 }
 
-.popup .close {
+/* Popup Content */
+.popup-content {
+    padding: 20px;
+    text-align: center;
+    font-family: 'Arial', sans-serif;
+}
+
+/* Popup Title */
+.popup-content h3 {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+/* Popup Description */
+.popup-content p {
+    font-size: 1rem;
+    color: #555;
+    margin-bottom: 20px;
+}
+
+/* Class Selection Label */
+.popup-content label {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #333;
+    display: block;
+    margin-bottom: 8px;
+}
+
+/* Dropdown Styling */
+#popupClassSelect {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Save Button */
+#saveClassButton {
+    width: 100%;
+    background-color: #007bff;
+    color: #ffffff;
+    font-size: 1.1rem;
+    padding: 10px 0;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+#saveClassButton:hover {
+    background-color: #0056b3;
+}
+
+/* Close Button */
+.close {
     position: absolute;
     top: 10px;
-    right: 10px;
+    right: 15px;
+    font-size: 1.5rem;
+    color: #555;
     cursor: pointer;
-    font-size: 24px;
-    color: #333;
+    transition: color 0.2s ease;
 }
+
+.close:hover {
+    color: #000;
+}
+
 
 .menu-section {
     background: #fff;
@@ -391,61 +444,127 @@ input[type="text"] {
     justify-content: center;
 }
 
-.day-tally {
-    background-color: #ffffff;
-    border-radius: 10px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    padding: 15px 20px;
-    width: 300px;
-    max-width: 100%;
-    text-align: left;
-    font-family: 'Arial', sans-serif;
+/* Container for the Week Two Tally */
+#tallyContainerWeekTwo {
+    display: flex;          /* Enables horizontal layout */
+    flex-wrap: wrap;        /* Wraps items to the next row if necessary */
+    gap: 20px;              /* Adds space between items */
+    padding: 15px;
+    border: 1px solid #ccc;
+    background: #f9f9f9;
+    border-radius: 5px;
 }
 
+/* Styling for each day's section */
+.day-tally {
+    flex: 1 1 calc(50% - 20px); /* Flexible width, adjusts to fit container */
+    min-width: 300px;           /* Ensures a minimum size */
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #ffffff;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+}
+
+/* Heading for each day */
 .day-tally h3 {
     margin-top: 0;
-    color: #444;
-    font-size: 1.5em;
-    font-weight: bold;
-    border-bottom: 2px solid #4caf50;
+    color: #333;
+    font-size: 18px;
+    border-bottom: 1px solid #eee;
     padding-bottom: 5px;
 }
 
+/* Section for mains or desserts */
 .tally-section {
-    margin-top: 15px;
+    margin-top: 10px;
 }
 
+/* Tally section headings */
 .tally-section h4 {
-    color: #4caf50;
-    font-size: 1.2em;
+    font-size: 16px;
+    color: #555;
     margin-bottom: 5px;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 5px;
 }
 
+/* List of tally items */
 .tally-list {
     list-style: none;
     padding: 0;
     margin: 0;
 }
 
+/* Individual tally items */
 .tally-list li {
-    font-size: 1em;
-    padding: 8px 10px;
-    margin-bottom: 5px;
-    background: #f7f7f7;
-    border-radius: 5px;
-    display: flex;
+    display: flex;           /* Ensures text and count are aligned */
     justify-content: space-between;
-    align-items: center;
+    padding: 5px 0;
+    border-bottom: 1px dashed #ddd;
     color: #333;
 }
 
-.tally-list li:last-child {
-    margin-bottom: 0;
-}
-
+/* Highlighted count */
 .tally-list li span {
     font-weight: bold;
     color: #4caf50;
+}
+
+.class-box {
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 5px;
+    background: #f9f9f9;
+    text-align: center;
+    flex: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.class-totals-container {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+#announcementsSection, #homeAnnouncements {
+    margin: 20px 0;
+}
+
+#announcementList li, #homeAnnouncementList li {
+    list-style-type: none;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    background-color: #f9f9f9;
+}
+
+#announcementList button {
+    padding: 5px 10px;
+    font-size: 12px;
+    border: none;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+#announcementList button:hover {
+    background-color: #ddd;
+}
+
+#storageManagement {
+    margin-top: 20px;
+}
+
+#exportDataButton, #importDataButton {
+    padding: 10px 15px;
+    margin-right: 10px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+}
+
+#exportDataButton:hover, #importDataButton:hover {
+    background-color: #0056b3;
 }

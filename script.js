@@ -312,6 +312,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (target === 'weekOne') {
                 renderWeekOne();
+            } else if (target == 'weekTwo') {
+                renderWeekTwoTable();
             }
         });
     });
@@ -407,7 +409,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const popup = document.getElementById('popup');
     const popupName = document.getElementById('popupName');
     const popupDetails = document.getElementById('popupDetails');
+    const popupClassSelect = document.getElementById('popupClassSelect');
+    const saveClassButton = document.getElementById('saveClassButton');
     const closePopup = document.getElementById('closePopup');
+
+    // Load students from local storage
+    let students = JSON.parse(localStorage.getItem("students"));
 
     // Render pupil profiles
     function renderProfiles() {
@@ -417,18 +424,34 @@ document.addEventListener('DOMContentLoaded', () => {
             // Create a profile box
             const profileBox = document.createElement('div');
             profileBox.className = 'profile-box';
-            profileBox.textContent = student.name;
+            profileBox.textContent = `${student.name} (${student.class})`;
 
             // Add click event to show popup
             profileBox.addEventListener('click', () => {
                 popupName.textContent = student.name;
                 popupDetails.textContent = `Lunch Details: ${student.lunchDetails}`;
+                popupClassSelect.value = student.class || ""; // Set the class dropdown value
+                popup.dataset.index = index; // Store the index of the clicked student
                 popup.style.display = 'block';
             });
 
             profileContainer.appendChild(profileBox);
         });
     }
+
+    // Save class to the selected student
+    saveClassButton.addEventListener('click', () => {
+        const index = popup.dataset.index;
+        const selectedClass = popupClassSelect.value;
+
+        if (index !== undefined) {
+            students[index].class = selectedClass; // Update the class in student data
+            localStorage.setItem("students", JSON.stringify(students)); // Save to local storage
+            //alert(`Class updated for ${students[index].name} to ${selectedClass}`);
+            renderProfiles();
+        }
+        popup.style.display = 'none';
+    });
 
     // Close the popup
     closePopup.addEventListener('click', () => {
@@ -442,10 +465,14 @@ document.addEventListener('DOMContentLoaded', () => {
             const target = event.target.dataset.target;
 
             if (target === 'profilePage') {
+                students = JSON.parse(localStorage.getItem("students")); // Reload students in case of updates
                 renderProfiles();
             }
         });
     });
+
+    // Render profiles initially
+    renderProfiles();
 });
 
 function saveMenu(week) {
@@ -496,6 +523,7 @@ function loadMenus() {
 // Load menus when the page loads
 document.addEventListener('DOMContentLoaded', loadMenus);
 document.addEventListener('DOMContentLoaded', updateLiveTally);
+document.addEventListener('DOMContentLoaded', updateLiveTally2);
 const students = JSON.parse(localStorage.getItem('students')) || []; // Initialize students array
 
 // Tally container at the top of the page
@@ -592,7 +620,96 @@ function updateLiveTally() {
     });
 }
 
+function updateLiveTally2(){
+    const menus = JSON.parse(localStorage.getItem('menus')) || {};
+    const weekMenu = menus.week2 || {};
+    const weekTwoStudents = JSON.parse(localStorage.getItem('week2_students')) || [];
 
+    const tally = {};
+
+    // Initialize tally object with menu items for each day
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+        const dayMenu = weekMenu[day] || {};
+        tally[day] = {
+            mains: {},
+            desserts: {}
+        };
+
+        // Initialize tally counts to 0
+        dayMenu.mains.forEach(main => {
+            tally[day].mains[main] = 0;
+        });
+        dayMenu.desserts.forEach(dessert => {
+            tally[day].desserts[dessert] = 0;
+        });
+    });
+
+    // Count selections
+    weekTwoStudents.forEach(student => {
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+            const mainChoice = student[`${day}_main`];
+            const dessertChoice = student[`${day}_dessert`];
+
+            if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
+                tally[day].mains[mainChoice]++;
+            }
+            if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
+                tally[day].desserts[dessertChoice]++;
+            }
+        });
+    });
+
+    // Generate the tally table dynamically
+    const tallyContainer = document.getElementById('tallyContainerWeekTwo');
+    tallyContainer.innerHTML = ''; // Clear previous content
+
+    Object.keys(tally).forEach(day => {
+        const dayTally = tally[day];
+
+        // Create a section for each day
+        const daySection = document.createElement('div');
+        daySection.className = 'day-tally';
+
+        const dayHeading = document.createElement('h3');
+        dayHeading.textContent = day;
+        daySection.appendChild(dayHeading);
+
+        // Add mains tally
+        const mainsSection = document.createElement('div');
+        mainsSection.className = 'tally-section';
+        const mainsHeading = document.createElement('h4');
+        mainsHeading.textContent = 'Mains:';
+        mainsSection.appendChild(mainsHeading);
+        const mainsList = document.createElement('ul');
+        mainsList.className = 'tally-list';
+        Object.keys(dayTally.mains).forEach(main => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `${main} <span>${dayTally.mains[main]}</span>`;
+            mainsList.appendChild(listItem);
+        });
+        mainsSection.appendChild(mainsList);
+        daySection.appendChild(mainsSection);
+
+        // Add desserts tally
+        const dessertsSection = document.createElement('div');
+        dessertsSection.className = 'tally-section';
+        const dessertsHeading = document.createElement('h4');
+        dessertsHeading.textContent = 'Desserts:';
+        dessertsSection.appendChild(dessertsHeading);
+        const dessertsList = document.createElement('ul');
+        dessertsList.className = 'tally-list';
+        Object.keys(dayTally.desserts).forEach(dessert => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `${dessert} <span>${dayTally.desserts[dessert]}</span>`;
+            dessertsList.appendChild(listItem);
+        });
+        dessertsSection.appendChild(dessertsList);
+        daySection.appendChild(dessertsSection);
+
+        // Append day's section to the container
+        tallyContainer.appendChild(daySection);
+    });
+}
 
 function setupDropdownListeners() {
     const dropdowns = document.querySelectorAll('select');
@@ -654,7 +771,7 @@ document.getElementById('printTallyButton').addEventListener('click', () => {
     headerRow.style.textAlign = 'center';
     headerRow.style.padding = '10px';
     headerRow.style.marginBottom = '10px';
-    headerRow.textContent = 'WEEK 1';
+    headerRow.textContent = 'Primary - WEEK 1';
     printableContent.appendChild(headerRow);
 
     ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
@@ -702,10 +819,241 @@ document.getElementById('printTallyButton').addEventListener('click', () => {
     });
 
     // Open new window for printing
-    const newWindow = window.open('', '_blank');
-    newWindow.document.write('<html><head><title>Print Tally</title></head><body>');
+    const newWindow = window.open('', '_Primary_Lunches');
+    
     newWindow.document.write(printableContent.outerHTML);
-    newWindow.document.write('</body></html>');
+    
     newWindow.document.close();
     newWindow.print();
 });
+
+
+document.getElementById('printTallyButtonWeekTwo').addEventListener('click', () => {
+    const menus = JSON.parse(localStorage.getItem('menus')) || {};
+    const weekMenu = menus.week2 || {};
+    const tally = {};
+
+    // Initialize tally
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+        tally[day] = { mains: {}, desserts: {} };
+        const dayMenu = weekMenu[day] || {};
+        (dayMenu.mains || []).forEach(main => (tally[day].mains[main] = 0));
+        (dayMenu.desserts || []).forEach(dessert => (tally[day].desserts[dessert] = 0));
+    });
+
+    // Count choices
+    students.forEach(student => {
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+            const mainChoice = student[`${day}Main`];
+            const dessertChoice = student[`${day}Dessert`];
+
+            if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
+                tally[day].mains[mainChoice]++;
+            }
+            if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
+                tally[day].desserts[dessertChoice]++;
+            }
+        });
+    });
+
+    // Create printable table
+    const printableContent = document.createElement('div');
+    printableContent.style.fontFamily = 'Arial, sans-serif';
+    printableContent.style.borderCollapse = 'collapse';
+    printableContent.style.width = '100%';
+
+    const headerRow = document.createElement('div');
+    headerRow.style.backgroundColor = '#ffd700'; // Gold background
+    headerRow.style.fontWeight = 'bold';
+    headerRow.style.textAlign = 'center';
+    headerRow.style.padding = '10px';
+    headerRow.style.marginBottom = '10px';
+    headerRow.textContent = 'Primary - WEEK 2';
+    printableContent.appendChild(headerRow);
+
+    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+        const dayContainer = document.createElement('div');
+        dayContainer.style.border = '1px solid #000';
+        dayContainer.style.marginBottom = '10px';
+        dayContainer.style.padding = '10px';
+
+        // Add day name
+        const dayHeader = document.createElement('h3');
+        dayHeader.textContent = day.toUpperCase();
+        dayHeader.style.textAlign = 'center';
+        dayHeader.style.backgroundColor = '#ffd700';
+        dayHeader.style.margin = '0';
+        dayHeader.style.padding = '5px';
+        dayContainer.appendChild(dayHeader);
+
+        // Mains
+        const mainsTitle = document.createElement('strong');
+        mainsTitle.textContent = 'Mains:';
+        dayContainer.appendChild(mainsTitle);
+
+        const mainsList = document.createElement('ul');
+        Object.keys(tally[day].mains).forEach(main => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${main}: ${tally[day].mains[main]}`;
+            mainsList.appendChild(listItem);
+        });
+        dayContainer.appendChild(mainsList);
+
+        // Desserts
+        const dessertsTitle = document.createElement('strong');
+        dessertsTitle.textContent = 'Desserts:';
+        dayContainer.appendChild(dessertsTitle);
+
+        const dessertsList = document.createElement('ul');
+        Object.keys(tally[day].desserts).forEach(dessert => {
+            const listItem = document.createElement('li');
+            listItem.textContent = `${dessert}: ${tally[day].desserts[dessert]}`;
+            dessertsList.appendChild(listItem);
+        });
+        dayContainer.appendChild(dessertsList);
+
+        printableContent.appendChild(dayContainer);
+    });
+
+    // Open new window for printing
+    const newWindow = window.open('', '_Primary_Lunches');
+    
+    newWindow.document.write(printableContent.outerHTML);
+    
+    newWindow.document.close();
+    newWindow.print();
+});
+
+
+
+
+
+
+
+
+    const weekTwoSection = document.getElementById('weekTwo');
+    const weekTwoTable = document.getElementById('weekTwoTable').getElementsByTagName('tbody')[0];
+    const addWeekTwoButton = document.getElementById('addWeekTwo');
+
+    function renderWeekTwoTable() {
+        weekTwoTable.innerHTML = '';
+    
+        // Retrieve menus and students from local storage
+        const menus = JSON.parse(localStorage.getItem('menus')) || {};
+        const weekTwoMenu = menus['week2'] || {};
+        const weekTwoStudents = JSON.parse(localStorage.getItem('week2_students')) || students; // Use week2_students key
+    
+        weekTwoStudents.forEach((student, index) => {
+            const row = weekTwoTable.insertRow();
+            row.insertCell(0).textContent = student.name;
+    
+            // Dropdowns for each day
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+                const cell = row.insertCell();
+                const dayMenu = weekTwoMenu[day] || { mains: [], desserts: [] };
+    
+                const dropdownContainer = document.createElement('div');
+                dropdownContainer.className = 'dropdown-container';
+    
+                // Main dishes dropdown
+                const mainSelect = document.createElement('select');
+                mainSelect.dataset.day = day;
+                mainSelect.dataset.index = index;
+                mainSelect.dataset.type = 'main';
+                mainSelect.style.width = '80%';
+    
+                // Add placeholder and options for main dishes
+                mainSelect.innerHTML = `<option value="">Select Main...</option>`;
+                dayMenu.mains.forEach(dish => {
+                    const opt = document.createElement('option');
+                    opt.value = dish;
+                    opt.textContent = dish;
+                    mainSelect.appendChild(opt);
+                });
+    
+                mainSelect.value = student[`${day}_main`] || ''; // Set selected value
+    
+                mainSelect.addEventListener('change', (event) => {
+                    const studentIndex = event.target.dataset.index;
+                    const day = event.target.dataset.day;
+                    weekTwoStudents[studentIndex][`${day}_main`] = event.target.value;
+                    localStorage.setItem('week2_students', JSON.stringify(weekTwoStudents)); // Save week 2 data
+                    updateLiveTally2();
+                });
+    
+                // Desserts dropdown
+                const dessertSelect = document.createElement('select');
+                dessertSelect.dataset.day = day;
+                dessertSelect.dataset.index = index;
+                dessertSelect.dataset.type = 'dessert';
+                dessertSelect.style.width = '80%';
+    
+                // Add placeholder and options for desserts
+                dessertSelect.innerHTML = `<option value="">Select Dessert...</option>`;
+                dayMenu.desserts.forEach(dessert => {
+                    const opt = document.createElement('option');
+                    opt.value = dessert;
+                    opt.textContent = dessert;
+                    dessertSelect.appendChild(opt);
+                });
+    
+                dessertSelect.value = student[`${day}_dessert`] || ''; // Set selected value
+    
+                dessertSelect.addEventListener('change', (event) => {
+                    const studentIndex = event.target.dataset.index;
+                    const day = event.target.dataset.day;
+                    weekTwoStudents[studentIndex][`${day}_dessert`] = event.target.value;
+                    localStorage.setItem('week2_students', JSON.stringify(weekTwoStudents)); // Save week 2 data
+                    updateLiveTally2();
+                });
+    
+                // Append dropdowns to the container
+                dropdownContainer.appendChild(mainSelect);
+                dropdownContainer.appendChild(dessertSelect);
+    
+                cell.appendChild(dropdownContainer);
+            });
+    
+            // Add delete button
+            const actionCell = row.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = () => {
+                weekTwoStudents.splice(index, 1); // Remove the student
+                localStorage.setItem('week2_students', JSON.stringify(weekTwoStudents)); // Save updated week 2 data
+                renderWeekTwoTable(); // Re-render the table
+                
+            };
+            actionCell.appendChild(deleteButton);
+            
+        });
+    
+        
+    }
+    
+    
+    
+
+    function handleLunchEdit(event) {
+        const index = event.target.dataset.index;
+        const day = event.target.dataset.day;
+        students[index][day] = event.target.value;
+        localStorage.setItem('students', JSON.stringify(students));
+    }
+
+    
+
+    // Navigation to Week One
+    navLinks.forEach(link => {
+        link.addEventListener('click', (event) => {
+            const target = event.target.dataset.target;
+            sections.forEach(section => section.style.display = 'none');
+            document.getElementById(target).style.display = 'block';
+
+            if (target === 'weekOne') {
+                renderWeekOne();
+            } else if (target == 'weekTwo') {
+                renderWeekTwoTable();
+            }
+        });
+    });
