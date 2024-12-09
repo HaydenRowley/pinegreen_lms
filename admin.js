@@ -129,3 +129,36 @@ document.getElementById('importDataButton').addEventListener('click', () => {
         }
     });
 });
+
+// Load the saved swimming class on page load
+document.addEventListener('DOMContentLoaded', () => {
+    const savedClass = localStorage.getItem('swimmingClass');
+    const swimmingClassSelect = document.getElementById('swimmingClassSelect');
+
+    if (savedClass) {
+        swimmingClassSelect.value = savedClass;
+    }
+});
+
+// Save the selected swimming class to localStorage
+document.getElementById('saveSwimmingClassButton').addEventListener('click', () => {
+    const swimmingClassSelect = document.getElementById('swimmingClassSelect');
+    const selectedClass = swimmingClassSelect.value;
+
+    if (selectedClass) {
+        localStorage.setItem('swimmingClass', selectedClass);
+        alert(`Swimming class updated to ${selectedClass}`);
+    } else {
+        alert('Please select a class before saving.');
+    }
+});
+
+// Get the swimming class on Thursday
+const swimmingClass = localStorage.getItem('swimmingClass');
+
+// Example usage in a tally or rendering function
+if (swimmingClass) {
+    console.log(`On Thursday, ${swimmingClass} goes swimming.`);
+    document.getElementById('swimmingClass').innerHTML = swimmingClass;
+}
+

@@ -734,27 +734,57 @@ function setupDropdownListeners() {
 document.getElementById('printTallyButton').addEventListener('click', () => {
     const menus = JSON.parse(localStorage.getItem('menus')) || {};
     const weekMenu = menus.week1 || {};
+    const students = JSON.parse(localStorage.getItem('students')) || [];
     const tally = {};
+
+    // Retrieve the swimming class from localStorage
+    const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A'; // Default to Class A if not set
 
     // Initialize tally
     ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        tally[day] = { mains: {}, desserts: {} };
+        tally[day] = { mains: {}, desserts: {}, swimming: { mains: {}, desserts: {} }, nonSwimming: { mains: {}, desserts: {} } };
         const dayMenu = weekMenu[day] || {};
-        dayMenu.mains.forEach(main => (tally[day].mains[main] = 0));
-        dayMenu.desserts.forEach(dessert => (tally[day].desserts[dessert] = 0));
+        if (dayMenu.mains) {
+            dayMenu.mains.forEach(main => {
+                tally[day].mains[main] = 0;
+                tally[day].swimming.mains[main] = 0;
+                tally[day].nonSwimming.mains[main] = 0;
+            });
+        }
+        if (dayMenu.desserts) {
+            dayMenu.desserts.forEach(dessert => {
+                tally[day].desserts[dessert] = 0;
+                tally[day].swimming.desserts[dessert] = 0;
+                tally[day].nonSwimming.desserts[dessert] = 0;
+            });
+        }
     });
 
-    // Count choices
+    // Count choices based on student class
     students.forEach(student => {
         ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
             const mainChoice = student[`${day}Main`];
             const dessertChoice = student[`${day}Dessert`];
 
+            // Check if the main/dessert choice is valid
             if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
-                tally[day].mains[mainChoice]++;
+                if (day === 'Thursday' && student.class === swimmingClass) {
+                    tally[day].swimming.mains[mainChoice]++;
+                } else if (day === 'Thursday') {
+                    tally[day].nonSwimming.mains[mainChoice]++;
+                } else {
+                    tally[day].mains[mainChoice]++;
+                }
             }
+
             if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
-                tally[day].desserts[dessertChoice]++;
+                if (day === 'Thursday' && student.class === swimmingClass) {
+                    tally[day].swimming.desserts[dessertChoice]++;
+                } else if (day === 'Thursday') {
+                    tally[day].nonSwimming.desserts[dessertChoice]++;
+                } else {
+                    tally[day].desserts[dessertChoice]++;
+                }
             }
         });
     });
@@ -771,9 +801,10 @@ document.getElementById('printTallyButton').addEventListener('click', () => {
     headerRow.style.textAlign = 'center';
     headerRow.style.padding = '10px';
     headerRow.style.marginBottom = '10px';
-    headerRow.textContent = 'Primary - WEEK 1';
+    headerRow.textContent = 'WEEK 1';
     printableContent.appendChild(headerRow);
 
+    // Iterate over the days and generate the tally
     ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
         const dayContainer = document.createElement('div');
         dayContainer.style.border = '1px solid #000';
@@ -789,43 +820,107 @@ document.getElementById('printTallyButton').addEventListener('click', () => {
         dayHeader.style.padding = '5px';
         dayContainer.appendChild(dayHeader);
 
-        // Mains
-        const mainsTitle = document.createElement('strong');
-        mainsTitle.textContent = 'Mains:';
-        dayContainer.appendChild(mainsTitle);
+        if (day === 'Thursday') {
+            // Add Swimming Class Header
+            const swimmingHeader = document.createElement('h4');
+            swimmingHeader.textContent = `Swimming Class: ${swimmingClass}`;
+            swimmingHeader.style.textAlign = 'center';
+            swimmingHeader.style.fontWeight = 'bold';
+            swimmingHeader.style.marginTop = '10px';
+            swimmingHeader.style.marginBottom = '10px';
+            dayContainer.appendChild(swimmingHeader);
 
-        const mainsList = document.createElement('ul');
-        Object.keys(tally[day].mains).forEach(main => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${main}: ${tally[day].mains[main]}`;
-            mainsList.appendChild(listItem);
-        });
-        dayContainer.appendChild(mainsList);
+            // Swimming Class Mains
+            const swimmingMainsTitle = document.createElement('strong');
+            swimmingMainsTitle.textContent = 'Swimming Class Mains:';
+            dayContainer.appendChild(swimmingMainsTitle);
 
-        // Desserts
-        const dessertsTitle = document.createElement('strong');
-        dessertsTitle.textContent = 'Desserts:';
-        dayContainer.appendChild(dessertsTitle);
+            const swimmingMainsList = document.createElement('ul');
+            Object.keys(tally[day].swimming.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${main}: ${tally[day].swimming.mains[main]}`;
+                swimmingMainsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(swimmingMainsList);
 
-        const dessertsList = document.createElement('ul');
-        Object.keys(tally[day].desserts).forEach(dessert => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${dessert}: ${tally[day].desserts[dessert]}`;
-            dessertsList.appendChild(listItem);
-        });
-        dayContainer.appendChild(dessertsList);
+            // Non-Swimming Class Mains
+            const nonSwimmingMainsTitle = document.createElement('strong');
+            nonSwimmingMainsTitle.textContent = 'Non-Swimming Class Mains:';
+            dayContainer.appendChild(nonSwimmingMainsTitle);
+
+            const nonSwimmingMainsList = document.createElement('ul');
+            Object.keys(tally[day].nonSwimming.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${main}: ${tally[day].nonSwimming.mains[main]}`;
+                nonSwimmingMainsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(nonSwimmingMainsList);
+
+            // Swimming Class Desserts
+            const swimmingDessertsTitle = document.createElement('strong');
+            swimmingDessertsTitle.textContent = 'Swimming Class Desserts:';
+            dayContainer.appendChild(swimmingDessertsTitle);
+
+            const swimmingDessertsList = document.createElement('ul');
+            Object.keys(tally[day].swimming.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${dessert}: ${tally[day].swimming.desserts[dessert]}`;
+                swimmingDessertsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(swimmingDessertsList);
+
+            // Non-Swimming Class Desserts
+            const nonSwimmingDessertsTitle = document.createElement('strong');
+            nonSwimmingDessertsTitle.textContent = 'Non-Swimming Class Desserts:';
+            dayContainer.appendChild(nonSwimmingDessertsTitle);
+
+            const nonSwimmingDessertsList = document.createElement('ul');
+            Object.keys(tally[day].nonSwimming.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${dessert}: ${tally[day].nonSwimming.desserts[dessert]}`;
+                nonSwimmingDessertsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(nonSwimmingDessertsList);
+        } else {
+            // Mains
+            const mainsTitle = document.createElement('strong');
+            mainsTitle.textContent = 'Mains:';
+            dayContainer.appendChild(mainsTitle);
+
+            const mainsList = document.createElement('ul');
+            Object.keys(tally[day].mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${main}: ${tally[day].mains[main]}`;
+                mainsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(mainsList);
+
+            // Desserts
+            const dessertsTitle = document.createElement('strong');
+            dessertsTitle.textContent = 'Desserts:';
+            dayContainer.appendChild(dessertsTitle);
+
+            const dessertsList = document.createElement('ul');
+            Object.keys(tally[day].desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.textContent = `${dessert}: ${tally[day].desserts[dessert]}`;
+                dessertsList.appendChild(listItem);
+            });
+            dayContainer.appendChild(dessertsList);
+        }
 
         printableContent.appendChild(dayContainer);
     });
 
     // Open new window for printing
     const newWindow = window.open('', '_Primary_Lunches');
-    
     newWindow.document.write(printableContent.outerHTML);
-    
     newWindow.document.close();
     newWindow.print();
 });
+
+
+
 
 
 document.getElementById('printTallyButtonWeekTwo').addEventListener('click', () => {

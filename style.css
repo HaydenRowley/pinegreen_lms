@@ -568,3 +568,29 @@ input[type="text"] {
 #exportDataButton:hover, #importDataButton:hover {
     background-color: #0056b3;
 }
+
+#swimmingManagement {
+    margin-top: 20px;
+}
+
+#swimmingClassSelect {
+    padding: 10px;
+    margin-right: 10px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#saveSwimmingClassButton {
+    padding: 10px 15px;
+    font-size: 14px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: white;
+}
+
+#saveSwimmingClassButton:hover {
+    background-color: #0056b3;
+}

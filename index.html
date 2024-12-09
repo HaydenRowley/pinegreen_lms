@@ -47,8 +47,8 @@
 
             <!-- Placeholder for future information -->
             <div class="dashboard-card">
-                <h3>Additional Information</h3>
-                <p>This section will display more details soon.</p>
+                <h3>Swimming Class</h3>
+                <p id="swimmingClass">Class</p>
             </div>
         </div>
 
@@ -205,6 +205,18 @@
             <button id="exportDataButton">Export Data</button>
             <input type="file" id="importDataInput" style="display: none;">
             <button id="importDataButton">Import Data</button>
+        </div>
+        
+        <div id="swimmingManagement">
+            <h3>Thursday Swimming Class</h3>
+            <label for="swimmingClassSelect">Select Class:</label>
+            <select id="swimmingClassSelect">
+                <option value="">-- Select Class --</option>
+                <option value="Lions">Lions</option>
+                <option value="Panthers">Panthers</option>
+                <!-- Add more classes as needed -->
+            </select>
+            <button id="saveSwimmingClassButton">Save</button>
         </div>
         
 
