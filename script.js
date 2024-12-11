@@ -222,7 +222,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainSelect.dataset.day = day;
                 mainSelect.dataset.index = index;
                 mainSelect.dataset.type = 'main';
-                mainSelect.style.width = '60%';
+                mainSelect.style.width = '80%';
     
                 // Add placeholder and options for main dishes
                 mainSelect.innerHTML = `<option value="">Select Main...</option>`;
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 dessertSelect.dataset.day = day;
                 dessertSelect.dataset.index = index;
                 dessertSelect.dataset.type = 'dessert';
-                dessertSelect.style.width = '40%';
+                dessertSelect.style.width = '80%';
     
                 // Add placeholder and options for desserts
                 dessertSelect.innerHTML = `<option value="">Select Dessert...</option>`;
@@ -314,6 +314,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderWeekOne();
             } else if (target == 'weekTwo') {
                 renderWeekTwoTable();
+            } else if (target == 'weekThree') {
+                renderWeekThreeTable();
             }
         });
     });
@@ -480,8 +482,8 @@ function saveMenu(week) {
 
     // Days of the week to iterate over
     ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        const mainsInput = document.getElementById(`${week}${day}Mains`);
-        const dessertsInput = document.getElementById(`${week}${day}Desserts`);
+        const mainsInput = document.getElementById(`${week}${day}_mains`);
+        const dessertsInput = document.getElementById(`${week}${day}_desserts`);
 
         if (mainsInput && dessertsInput) {
             const mains = mainsInput.value.split(',').map(main => main.trim());
@@ -524,6 +526,7 @@ function loadMenus() {
 document.addEventListener('DOMContentLoaded', loadMenus);
 document.addEventListener('DOMContentLoaded', updateLiveTally);
 document.addEventListener('DOMContentLoaded', updateLiveTally2);
+document.addEventListener('DOMContentLoaded', updateLiveTally3);
 const students = JSON.parse(localStorage.getItem('students')) || []; // Initialize students array
 
 // Tally container at the top of the page
@@ -533,42 +536,12 @@ const tallyContainer = document.getElementById('tallyContainer');
 function updateLiveTally() {
     const menus = JSON.parse(localStorage.getItem('menus')) || {};
     const weekMenu = menus.week1 || {};
+    const students = JSON.parse(localStorage.getItem('students')) || [];
+    const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A';
 
-    const tally = {};
+    const tally = calculateTally(weekMenu, students, swimmingClass);
 
-    // Initialize tally object with menu items for each day
-    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        const dayMenu = weekMenu[day] || {};
-        tally[day] = {
-            mains: {},
-            desserts: {}
-        };
-
-        // Initialize tally counts to 0
-        dayMenu.mains.forEach(main => {
-            tally[day].mains[main] = 0;
-        });
-        dayMenu.desserts.forEach(dessert => {
-            tally[day].desserts[dessert] = 0;
-        });
-    });
-
-    // Count selections
-    students.forEach(student => {
-        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-            const mainChoice = student[`${day}_main`];
-            const dessertChoice = student[`${day}_dessert`];
-
-            if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
-                tally[day].mains[mainChoice]++;
-            }
-            if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
-                tally[day].desserts[dessertChoice]++;
-            }
-        });
-    });
-
-    // Generate the tally table dynamically
+    // Update the live tally display using the returned tally
     const tallyContainer = document.getElementById('tallyContainer');
     tallyContainer.innerHTML = ''; // Clear previous content
 
@@ -583,42 +556,97 @@ function updateLiveTally() {
         dayHeading.textContent = day;
         daySection.appendChild(dayHeading);
 
-        // Add mains tally
-        const mainsSection = document.createElement('div');
-        mainsSection.className = 'tally-section';
-        const mainsHeading = document.createElement('h4');
-        mainsHeading.textContent = 'Mains:';
-        mainsSection.appendChild(mainsHeading);
-        const mainsList = document.createElement('ul');
-        mainsList.className = 'tally-list';
-        Object.keys(dayTally.mains).forEach(main => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `${main} <span>${dayTally.mains[main]}</span>`;
-            mainsList.appendChild(listItem);
-        });
-        mainsSection.appendChild(mainsList);
-        daySection.appendChild(mainsSection);
+        // Handle Thursday separately for swimming and non-swimming
+        if (day === 'Thursday') {
+            // Swimming Class
+            const swimmingSection = document.createElement('div');
+            swimmingSection.className = 'tally-section';
+            const swimmingHeading = document.createElement('h4');
+            swimmingHeading.textContent = 'Swimming Class:';
+            swimmingSection.appendChild(swimmingHeading);
+            const swimmingMainsList = document.createElement('ul');
+            swimmingMainsList.className = 'tally-list';
+            Object.keys(dayTally.swimming.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${main} <span>${dayTally.swimming.mains[main]}</span>`;
+                swimmingMainsList.appendChild(listItem);
+            });
+            swimmingSection.appendChild(swimmingMainsList);
 
-        // Add desserts tally
-        const dessertsSection = document.createElement('div');
-        dessertsSection.className = 'tally-section';
-        const dessertsHeading = document.createElement('h4');
-        dessertsHeading.textContent = 'Desserts:';
-        dessertsSection.appendChild(dessertsHeading);
-        const dessertsList = document.createElement('ul');
-        dessertsList.className = 'tally-list';
-        Object.keys(dayTally.desserts).forEach(dessert => {
-            const listItem = document.createElement('li');
-            listItem.innerHTML = `${dessert} <span>${dayTally.desserts[dessert]}</span>`;
-            dessertsList.appendChild(listItem);
-        });
-        dessertsSection.appendChild(dessertsList);
-        daySection.appendChild(dessertsSection);
+            const swimmingDessertsList = document.createElement('ul');
+            swimmingDessertsList.className = 'tally-list';
+            Object.keys(dayTally.swimming.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${dessert} <span>${dayTally.swimming.desserts[dessert]}</span>`;
+                swimmingDessertsList.appendChild(listItem);
+            });
+            swimmingSection.appendChild(swimmingDessertsList);
+            daySection.appendChild(swimmingSection);
+
+            // Non-Swimming Class
+            const nonSwimmingSection = document.createElement('div');
+            nonSwimmingSection.className = 'tally-section';
+            const nonSwimmingHeading = document.createElement('h4');
+            nonSwimmingHeading.textContent = 'Non-Swimming Class:';
+            nonSwimmingSection.appendChild(nonSwimmingHeading);
+            const nonSwimmingMainsList = document.createElement('ul');
+            nonSwimmingMainsList.className = 'tally-list';
+            Object.keys(dayTally.nonSwimming.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${main} <span>${dayTally.nonSwimming.mains[main]}</span>`;
+                nonSwimmingMainsList.appendChild(listItem);
+            });
+            nonSwimmingSection.appendChild(nonSwimmingMainsList);
+
+            const nonSwimmingDessertsList = document.createElement('ul');
+            nonSwimmingDessertsList.className = 'tally-list';
+            Object.keys(dayTally.nonSwimming.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${dessert} <span>${dayTally.nonSwimming.desserts[dessert]}</span>`;
+                nonSwimmingDessertsList.appendChild(listItem);
+            });
+            nonSwimmingSection.appendChild(nonSwimmingDessertsList);
+            daySection.appendChild(nonSwimmingSection);
+        } else {
+            // General Mains
+            const mainsSection = document.createElement('div');
+            mainsSection.className = 'tally-section';
+            const mainsHeading = document.createElement('h4');
+            mainsHeading.textContent = 'Mains:';
+            mainsSection.appendChild(mainsHeading);
+            const mainsList = document.createElement('ul');
+            mainsList.className = 'tally-list';
+            Object.keys(dayTally.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${main} <span>${dayTally.mains[main]}</span>`;
+                mainsList.appendChild(listItem);
+            });
+            mainsSection.appendChild(mainsList);
+            daySection.appendChild(mainsSection);
+
+            // General Desserts
+            const dessertsSection = document.createElement('div');
+            dessertsSection.className = 'tally-section';
+            const dessertsHeading = document.createElement('h4');
+            dessertsHeading.textContent = 'Desserts:';
+            dessertsSection.appendChild(dessertsHeading);
+            const dessertsList = document.createElement('ul');
+            dessertsList.className = 'tally-list';
+            Object.keys(dayTally.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${dessert} <span>${dayTally.desserts[dessert]}</span>`;
+                dessertsList.appendChild(listItem);
+            });
+            dessertsSection.appendChild(dessertsList);
+            daySection.appendChild(dessertsSection);
+        }
 
         // Append day's section to the container
         tallyContainer.appendChild(daySection);
     });
 }
+
+
 
 function updateLiveTally2(){
     const menus = JSON.parse(localStorage.getItem('menus')) || {};
@@ -730,20 +758,20 @@ function setupDropdownListeners() {
     });
 }
 
-
-document.getElementById('printTallyButton').addEventListener('click', () => {
-    const menus = JSON.parse(localStorage.getItem('menus')) || {};
-    const weekMenu = menus.week1 || {};
-    const students = JSON.parse(localStorage.getItem('students')) || [];
+function calculateTally(weekMenu, students, swimmingClass) {
     const tally = {};
 
-    // Retrieve the swimming class from localStorage
-    const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A'; // Default to Class A if not set
-
-    // Initialize tally
+    // Initialize tally object with menu items for each day
     ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        tally[day] = { mains: {}, desserts: {}, swimming: { mains: {}, desserts: {} }, nonSwimming: { mains: {}, desserts: {} } };
         const dayMenu = weekMenu[day] || {};
+        tally[day] = {
+            mains: {},
+            desserts: {},
+            swimming: { mains: {}, desserts: {} },
+            nonSwimming: { mains: {}, desserts: {} }
+        };
+
+        // Initialize tally counts
         if (dayMenu.mains) {
             dayMenu.mains.forEach(main => {
                 tally[day].mains[main] = 0;
@@ -760,269 +788,448 @@ document.getElementById('printTallyButton').addEventListener('click', () => {
         }
     });
 
-    // Count choices based on student class
+    // Count selections
     students.forEach(student => {
         ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-            const mainChoice = student[`${day}Main`];
-            const dessertChoice = student[`${day}Dessert`];
+            const mainChoice = student[`${day}_main`];
+            const dessertChoice = student[`${day}_dessert`];
 
-            // Check if the main/dessert choice is valid
-            if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
-                if (day === 'Thursday' && student.class === swimmingClass) {
-                    tally[day].swimming.mains[mainChoice]++;
-                } else if (day === 'Thursday') {
-                    tally[day].nonSwimming.mains[mainChoice]++;
+            // Handle swimming class on Thursday
+            if (day === 'Thursday') {
+                if (student.class === swimmingClass) {
+                    if (mainChoice && tally[day].swimming.mains[mainChoice] !== undefined) {
+                        tally[day].swimming.mains[mainChoice]++;
+                    }
+                    if (dessertChoice && tally[day].swimming.desserts[dessertChoice] !== undefined) {
+                        tally[day].swimming.desserts[dessertChoice]++;
+                    }
                 } else {
+                    if (mainChoice && tally[day].nonSwimming.mains[mainChoice] !== undefined) {
+                        tally[day].nonSwimming.mains[mainChoice]++;
+                    }
+                    if (dessertChoice && tally[day].nonSwimming.desserts[dessertChoice] !== undefined) {
+                        tally[day].nonSwimming.desserts[dessertChoice]++;
+                    }
+                }
+            } else {
+                if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
                     tally[day].mains[mainChoice]++;
                 }
-            }
-
-            if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
-                if (day === 'Thursday' && student.class === swimmingClass) {
-                    tally[day].swimming.desserts[dessertChoice]++;
-                } else if (day === 'Thursday') {
-                    tally[day].nonSwimming.desserts[dessertChoice]++;
-                } else {
+                if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
                     tally[day].desserts[dessertChoice]++;
                 }
             }
         });
     });
 
-    // Create printable table
-    const printableContent = document.createElement('div');
-    printableContent.style.fontFamily = 'Arial, sans-serif';
-    printableContent.style.borderCollapse = 'collapse';
-    printableContent.style.width = '100%';
-
-    const headerRow = document.createElement('div');
-    headerRow.style.backgroundColor = '#ffd700'; // Gold background
-    headerRow.style.fontWeight = 'bold';
-    headerRow.style.textAlign = 'center';
-    headerRow.style.padding = '10px';
-    headerRow.style.marginBottom = '10px';
-    headerRow.textContent = 'WEEK 1';
-    printableContent.appendChild(headerRow);
-
-    // Iterate over the days and generate the tally
-    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        const dayContainer = document.createElement('div');
-        dayContainer.style.border = '1px solid #000';
-        dayContainer.style.marginBottom = '10px';
-        dayContainer.style.padding = '10px';
-
-        // Add day name
-        const dayHeader = document.createElement('h3');
-        dayHeader.textContent = day.toUpperCase();
-        dayHeader.style.textAlign = 'center';
-        dayHeader.style.backgroundColor = '#ffd700';
-        dayHeader.style.margin = '0';
-        dayHeader.style.padding = '5px';
-        dayContainer.appendChild(dayHeader);
-
-        if (day === 'Thursday') {
-            // Add Swimming Class Header
-            const swimmingHeader = document.createElement('h4');
-            swimmingHeader.textContent = `Swimming Class: ${swimmingClass}`;
-            swimmingHeader.style.textAlign = 'center';
-            swimmingHeader.style.fontWeight = 'bold';
-            swimmingHeader.style.marginTop = '10px';
-            swimmingHeader.style.marginBottom = '10px';
-            dayContainer.appendChild(swimmingHeader);
-
-            // Swimming Class Mains
-            const swimmingMainsTitle = document.createElement('strong');
-            swimmingMainsTitle.textContent = 'Swimming Class Mains:';
-            dayContainer.appendChild(swimmingMainsTitle);
-
-            const swimmingMainsList = document.createElement('ul');
-            Object.keys(tally[day].swimming.mains).forEach(main => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${main}: ${tally[day].swimming.mains[main]}`;
-                swimmingMainsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(swimmingMainsList);
-
-            // Non-Swimming Class Mains
-            const nonSwimmingMainsTitle = document.createElement('strong');
-            nonSwimmingMainsTitle.textContent = 'Non-Swimming Class Mains:';
-            dayContainer.appendChild(nonSwimmingMainsTitle);
-
-            const nonSwimmingMainsList = document.createElement('ul');
-            Object.keys(tally[day].nonSwimming.mains).forEach(main => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${main}: ${tally[day].nonSwimming.mains[main]}`;
-                nonSwimmingMainsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(nonSwimmingMainsList);
-
-            // Swimming Class Desserts
-            const swimmingDessertsTitle = document.createElement('strong');
-            swimmingDessertsTitle.textContent = 'Swimming Class Desserts:';
-            dayContainer.appendChild(swimmingDessertsTitle);
-
-            const swimmingDessertsList = document.createElement('ul');
-            Object.keys(tally[day].swimming.desserts).forEach(dessert => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${dessert}: ${tally[day].swimming.desserts[dessert]}`;
-                swimmingDessertsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(swimmingDessertsList);
-
-            // Non-Swimming Class Desserts
-            const nonSwimmingDessertsTitle = document.createElement('strong');
-            nonSwimmingDessertsTitle.textContent = 'Non-Swimming Class Desserts:';
-            dayContainer.appendChild(nonSwimmingDessertsTitle);
-
-            const nonSwimmingDessertsList = document.createElement('ul');
-            Object.keys(tally[day].nonSwimming.desserts).forEach(dessert => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${dessert}: ${tally[day].nonSwimming.desserts[dessert]}`;
-                nonSwimmingDessertsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(nonSwimmingDessertsList);
-        } else {
-            // Mains
-            const mainsTitle = document.createElement('strong');
-            mainsTitle.textContent = 'Mains:';
-            dayContainer.appendChild(mainsTitle);
-
-            const mainsList = document.createElement('ul');
-            Object.keys(tally[day].mains).forEach(main => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${main}: ${tally[day].mains[main]}`;
-                mainsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(mainsList);
-
-            // Desserts
-            const dessertsTitle = document.createElement('strong');
-            dessertsTitle.textContent = 'Desserts:';
-            dayContainer.appendChild(dessertsTitle);
-
-            const dessertsList = document.createElement('ul');
-            Object.keys(tally[day].desserts).forEach(dessert => {
-                const listItem = document.createElement('li');
-                listItem.textContent = `${dessert}: ${tally[day].desserts[dessert]}`;
-                dessertsList.appendChild(listItem);
-            });
-            dayContainer.appendChild(dessertsList);
-        }
-
-        printableContent.appendChild(dayContainer);
-    });
-
-    // Open new window for printing
-    const newWindow = window.open('', '_Primary_Lunches');
-    newWindow.document.write(printableContent.outerHTML);
-    newWindow.document.close();
-    newWindow.print();
-});
-
-
-
+    return tally;
+}
 
 
 document.getElementById('printTallyButtonWeekTwo').addEventListener('click', () => {
+    // Retrieve stored data for Week 2
     const menus = JSON.parse(localStorage.getItem('menus')) || {};
-    const weekMenu = menus.week2 || {};
-    const tally = {};
+    const weekMenu = menus.week2 || {}; // Get week 2 menu
+    const students = JSON.parse(localStorage.getItem('week2_students')) || []; // Get week 2 students
+    const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A';
 
-    // Initialize tally
-    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        tally[day] = { mains: {}, desserts: {} };
-        const dayMenu = weekMenu[day] || {};
-        (dayMenu.mains || []).forEach(main => (tally[day].mains[main] = 0));
-        (dayMenu.desserts || []).forEach(dessert => (tally[day].desserts[dessert] = 0));
-    });
+    // Calculate tally using the shared function
+    const tally = calculateTally(weekMenu, students, swimmingClass);
 
-    // Count choices
-    students.forEach(student => {
-        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-            const mainChoice = student[`${day}Main`];
-            const dessertChoice = student[`${day}Dessert`];
+    // Log the tally data to check its structure
+    console.log(tally);
 
-            if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
-                tally[day].mains[mainChoice]++;
+    // Create printable content for Week 2
+    const printableContent = `
+        <style>
+            @page {
+                size: A3;
+                margin: 1cm;
+                @top-center {
+                    content: "Tally for Week 2 - Lunches and Desserts";
+                    font-size: 16px;
+                    color: #1d3557;
+                    font-weight: bold;
+                    padding: 5px;
+                }
             }
-            if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
-                tally[day].desserts[dessertChoice]++;
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.2;
+                margin: 0;
+                padding: 0;
+                color: #333;
             }
-        });
-    });
+            header {
+                text-align: center;
+                margin: 20px 0;
+            }
+            header h1 {
+                font-size: 2em;
+                color: #457b9d;
+                margin: 0;
+            }
+            h2 {
+                font-size: 1.5em;
+                color: #457b9d;
+                margin: 10px 0;
+            }
+            h3 {
+                font-size: 1.2em;
+                color: #1d3557;
+                margin: 8px 0;
+            }
+            h4 {
+                font-size: 1em;
+                color: #457b9d;
+                margin: 6px 0;
+            }
+            ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                font-size: 0.9em;
+            }
+            li {
+                margin: 2px 0;
+                padding: 4px;
+                border-bottom: 1px solid #e63946;
+            }
+            .day-section {
+                margin-bottom: 20px;
+                padding: 10px;
+                border: 1px solid #457b9d;
+                border-radius: 5px;
+                background: #f1faee;
+            }
+            .swimming-section {
+                padding: 10px;
+                border: 1px dashed #457b9d;
+                background: #e9f5f5;
+            }
+            .column-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: space-between;
+            }
+            .column {
+                flex: 1;
+                min-width: calc(50% - 10px);
+            }
+        </style>
+        <header>
+            <h1>Primary Lunches - Week 2</h1>
+        </header>
+        <div class="column-container">
+            ${Object.keys(tally).map(day => {
+                const dayTally = tally[day];
 
-    // Create printable table
-    const printableContent = document.createElement('div');
-    printableContent.style.fontFamily = 'Arial, sans-serif';
-    printableContent.style.borderCollapse = 'collapse';
-    printableContent.style.width = '100%';
+                // Ensure mains and desserts exist for each category
+                const generalMains = dayTally.mains || {};
+                const generalDesserts = dayTally.desserts || {};
 
-    const headerRow = document.createElement('div');
-    headerRow.style.backgroundColor = '#ffd700'; // Gold background
-    headerRow.style.fontWeight = 'bold';
-    headerRow.style.textAlign = 'center';
-    headerRow.style.padding = '10px';
-    headerRow.style.marginBottom = '10px';
-    headerRow.textContent = 'Primary - WEEK 2';
-    printableContent.appendChild(headerRow);
+                const swimmingMains = dayTally.swimming && dayTally.swimming.mains ? dayTally.swimming.mains : {};
+                const swimmingDesserts = dayTally.swimming && dayTally.swimming.desserts ? dayTally.swimming.desserts : {};
 
-    ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
-        const dayContainer = document.createElement('div');
-        dayContainer.style.border = '1px solid #000';
-        dayContainer.style.marginBottom = '10px';
-        dayContainer.style.padding = '10px';
+                const nonSwimmingMains = dayTally.nonSwimming && dayTally.nonSwimming.mains ? dayTally.nonSwimming.mains : {};
+                const nonSwimmingDesserts = dayTally.nonSwimming && dayTally.nonSwimming.desserts ? dayTally.nonSwimming.desserts : {};
 
-        // Add day name
-        const dayHeader = document.createElement('h3');
-        dayHeader.textContent = day.toUpperCase();
-        dayHeader.style.textAlign = 'center';
-        dayHeader.style.backgroundColor = '#ffd700';
-        dayHeader.style.margin = '0';
-        dayHeader.style.padding = '5px';
-        dayContainer.appendChild(dayHeader);
+                if (day === 'Thursday') {
+                    // Special layout for Thursday (with Swimming and Non-Swimming Classes)
+                    return ` 
+                        <div class="column">
+                            <div class="day-section">
+                                <h2>${day}</h2>
+                                <div class="swimming-section">
+                                    <h3>Swimming Class - 12:00 Eat</h3>
+                                    <h4>Mains</h4>
+                                    <ul>
+                                        ${Object.keys(swimmingMains).length > 0 ? 
+                                          Object.keys(swimmingMains).map(main => `
+                                            <li>${main}: ${swimmingMains[main]}</li>
+                                          `).join('') : 
+                                          '<li>No mains available</li>'
+                                        }
+                                    </ul>
+                                    <h4>Desserts</h4>
+                                    <ul>
+                                        ${Object.keys(swimmingDesserts).length > 0 ? 
+                                          Object.keys(swimmingDesserts).map(dessert => `
+                                            <li>${dessert}: ${swimmingDesserts[dessert]}</li>
+                                          `).join('') : 
+                                          '<li>No desserts available</li>'
+                                        }
+                                    </ul>
+                                    <h3>Rest of Primary - Normal Time</h3>
+                                    <h4>Mains</h4>
+                                    <ul>
+                                        ${Object.keys(nonSwimmingMains).length > 0 ? 
+                                          Object.keys(nonSwimmingMains).map(main => `
+                                            <li>${main}: ${nonSwimmingMains[main]}</li>
+                                          `).join('') : 
+                                          '<li>No mains available</li>'
+                                        }
+                                    </ul>
+                                    <h4>Desserts</h4>
+                                    <ul>
+                                        ${Object.keys(nonSwimmingDesserts).length > 0 ? 
+                                          Object.keys(nonSwimmingDesserts).map(dessert => `
+                                            <li>${dessert}: ${nonSwimmingDesserts[dessert]}</li>
+                                          `).join('') : 
+                                          '<li>No desserts available</li>'
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Default layout for other days
+                    return ` 
+                        <div class="column">
+                            <div class="day-section">
+                                <h2>${day}</h2>
+                                <h3>Mains</h3>
+                                <ul>
+                                    ${Object.keys(generalMains).length > 0 ? 
+                                      Object.keys(generalMains).map(main => `
+                                        <li>${main}: ${generalMains[main]}</li>
+                                      `).join('') : 
+                                      '<li>No mains available</li>'
+                                    }
+                                </ul>
+                                <h3>Desserts</h3>
+                                <ul>
+                                    ${Object.keys(generalDesserts).length > 0 ? 
+                                      Object.keys(generalDesserts).map(dessert => `
+                                        <li>${dessert}: ${generalDesserts[dessert]}</li>
+                                      `).join('') : 
+                                      '<li>No desserts available</li>'
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('')}
+        </div>
+    `;
 
-        // Mains
-        const mainsTitle = document.createElement('strong');
-        mainsTitle.textContent = 'Mains:';
-        dayContainer.appendChild(mainsTitle);
-
-        const mainsList = document.createElement('ul');
-        Object.keys(tally[day].mains).forEach(main => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${main}: ${tally[day].mains[main]}`;
-            mainsList.appendChild(listItem);
-        });
-        dayContainer.appendChild(mainsList);
-
-        // Desserts
-        const dessertsTitle = document.createElement('strong');
-        dessertsTitle.textContent = 'Desserts:';
-        dayContainer.appendChild(dessertsTitle);
-
-        const dessertsList = document.createElement('ul');
-        Object.keys(tally[day].desserts).forEach(dessert => {
-            const listItem = document.createElement('li');
-            listItem.textContent = `${dessert}: ${tally[day].desserts[dessert]}`;
-            dessertsList.appendChild(listItem);
-        });
-        dayContainer.appendChild(dessertsList);
-
-        printableContent.appendChild(dayContainer);
-    });
-
-    // Open new window for printing
-    const newWindow = window.open('', '_Primary_Lunches');
-    
-    newWindow.document.write(printableContent.outerHTML);
-    
-    newWindow.document.close();
-    newWindow.print();
+    // Open the print dialog
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.body.innerHTML = printableContent;
+        printWindow.document.close();
+        printWindow.print();
+    } else {
+        alert('Unable to open print window.');
+    }
 });
 
 
 
 
+document.getElementById('printTallyButtonWeekOne').addEventListener('click', () => {
+    // Retrieve stored data for Week 1
+    const menus = JSON.parse(localStorage.getItem('menus')) || {};
+    const weekMenu = menus.week1 || {}; // Get week 1 menu
+    const students = JSON.parse(localStorage.getItem('week1_students')) || []; // Get week 1 students
+    const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A';
 
+    // Calculate tally using the shared function
+    const tally = calculateTally(weekMenu, students, swimmingClass);
+
+    // Log the tally data to check its structure
+    console.log(tally);
+
+    // Create printable content for Week 1
+    const printableContent = `
+        <style>
+            @page {
+                size: A3;
+                margin: 1cm;
+                @top-center {
+                    content: "Tally for Week 1 - Lunches and Desserts";
+                    font-size: 16px;
+                    color: #1d3557;
+                    font-weight: bold;
+                    padding: 5px;
+                }
+            }
+            body {
+                font-family: Arial, sans-serif;
+                line-height: 1.2;
+                margin: 0;
+                padding: 0;
+                color: #333;
+            }
+            header {
+                text-align: center;
+                margin: 20px 0;
+            }
+            header h1 {
+                font-size: 2em;
+                color: #457b9d;
+                margin: 0;
+            }
+            h2 {
+                font-size: 1.5em;
+                color: #457b9d;
+                margin: 10px 0;
+            }
+            h3 {
+                font-size: 1.2em;
+                color: #1d3557;
+                margin: 8px 0;
+            }
+            h4 {
+                font-size: 1em;
+                color: #457b9d;
+                margin: 6px 0;
+            }
+            ul {
+                list-style-type: none;
+                padding: 0;
+                margin: 0;
+                font-size: 0.9em;
+            }
+            li {
+                margin: 2px 0;
+                padding: 4px;
+                border-bottom: 1px solid #e63946;
+            }
+            .day-section {
+                margin-bottom: 20px;
+                padding: 10px;
+                border: 1px solid #457b9d;
+                border-radius: 5px;
+                background: #f1faee;
+            }
+            .swimming-section {
+                padding: 10px;
+                border: 1px dashed #457b9d;
+                background: #e9f5f5;
+            }
+            .column-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: space-between;
+            }
+            .column {
+                flex: 1;
+                min-width: calc(50% - 10px);
+            }
+        </style>
+        <header>
+            <h1>Primary Lunches - Week 1</h1>
+        </header>
+        <div class="column-container">
+            ${Object.keys(tally).map(day => {
+                const dayTally = tally[day];
+
+                // Ensure mains and desserts exist for each category
+                const generalMains = dayTally.mains || {};
+                const generalDesserts = dayTally.desserts || {};
+
+                const swimmingMains = dayTally.swimming && dayTally.swimming.mains ? dayTally.swimming.mains : {};
+                const swimmingDesserts = dayTally.swimming && dayTally.swimming.desserts ? dayTally.swimming.desserts : {};
+
+                const nonSwimmingMains = dayTally.nonSwimming && dayTally.nonSwimming.mains ? dayTally.nonSwimming.mains : {};
+                const nonSwimmingDesserts = dayTally.nonSwimming && dayTally.nonSwimming.desserts ? dayTally.nonSwimming.desserts : {};
+
+                if (day === 'Thursday') {
+                    // Special layout for Thursday (with Swimming and Non-Swimming Classes)
+                    return ` 
+                        <div class="column">
+                            <div class="day-section">
+                                <h2>${day}</h2>
+                                <div class="swimming-section">
+                                    <h3>Swimming Class - 12:00 Eat</h3>
+                                    <h4>Mains</h4>
+                                    <ul>
+                                        ${Object.keys(swimmingMains).length > 0 ? 
+                                          Object.keys(swimmingMains).map(main => `
+                                            <li>${main}: ${swimmingMains[main]}</li>
+                                          `).join('') : 
+                                          '<li>No mains available</li>'
+                                        }
+                                    </ul>
+                                    <h4>Desserts</h4>
+                                    <ul>
+                                        ${Object.keys(swimmingDesserts).length > 0 ? 
+                                          Object.keys(swimmingDesserts).map(dessert => `
+                                            <li>${dessert}: ${swimmingDesserts[dessert]}</li>
+                                          `).join('') : 
+                                          '<li>No desserts available</li>'
+                                        }
+                                    </ul>
+                                    <h3>Rest of Primary - Normal Time</h3>
+                                    <h4>Mains</h4>
+                                    <ul>
+                                        ${Object.keys(nonSwimmingMains).length > 0 ? 
+                                          Object.keys(nonSwimmingMains).map(main => `
+                                            <li>${main}: ${nonSwimmingMains[main]}</li>
+                                          `).join('') : 
+                                          '<li>No mains available</li>'
+                                        }
+                                    </ul>
+                                    <h4>Desserts</h4>
+                                    <ul>
+                                        ${Object.keys(nonSwimmingDesserts).length > 0 ? 
+                                          Object.keys(nonSwimmingDesserts).map(dessert => `
+                                            <li>${dessert}: ${nonSwimmingDesserts[dessert]}</li>
+                                          `).join('') : 
+                                          '<li>No desserts available</li>'
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    // Default layout for other days
+                    return ` 
+                        <div class="column">
+                            <div class="day-section">
+                                <h2>${day}</h2>
+                                <h3>Mains</h3>
+                                <ul>
+                                    ${Object.keys(generalMains).length > 0 ? 
+                                      Object.keys(generalMains).map(main => `
+                                        <li>${main}: ${generalMains[main]}</li>
+                                      `).join('') : 
+                                      '<li>No mains available</li>'
+                                    }
+                                </ul>
+                                <h3>Desserts</h3>
+                                <ul>
+                                    ${Object.keys(generalDesserts).length > 0 ? 
+                                      Object.keys(generalDesserts).map(dessert => `
+                                        <li>${dessert}: ${generalDesserts[dessert]}</li>
+                                      `).join('') : 
+                                      '<li>No desserts available</li>'
+                                    }
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                }
+            }).join('')}
+        </div>
+    `;
+
+    // Open the print dialog
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+        printWindow.document.body.innerHTML = printableContent;
+        printWindow.document.close();
+        printWindow.print();
+    } else {
+        alert('Unable to open print window.');
+    }
+});
 
 
 
@@ -1124,7 +1331,7 @@ document.getElementById('printTallyButtonWeekTwo').addEventListener('click', () 
         });
     
         
-    }
+    }    
     
     
     
@@ -1138,6 +1345,428 @@ document.getElementById('printTallyButtonWeekTwo').addEventListener('click', () 
 
     
 
+    
+
+    function initializeTally(weekMenu) {
+        const tally = {};
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+            const dayMenu = weekMenu[day] || {};
+            tally[day] = {
+                mains: {},
+                desserts: {},
+                swimming: { mains: {}, desserts: {} },
+                nonSwimming: { mains: {}, desserts: {} }
+            };
+    
+            if (dayMenu.mains) {
+                dayMenu.mains.forEach(main => {
+                    tally[day].mains[main] = 0;
+                    tally[day].swimming.mains[main] = 0;
+                    tally[day].nonSwimming.mains[main] = 0;
+                });
+            }
+    
+            if (dayMenu.desserts) {
+                dayMenu.desserts.forEach(dessert => {
+                    tally[day].desserts[dessert] = 0;
+                    tally[day].swimming.desserts[dessert] = 0;
+                    tally[day].nonSwimming.desserts[dessert] = 0;
+                });
+            }
+        });
+        return tally;
+    }
+    
+    const weekThreeSection = document.getElementById('weekThree');
+    const weekThreeTable = document.getElementById('weekThreeTable').getElementsByTagName('tbody')[0];
+    const addWeekThreeButton = document.getElementById('addWeekThree');
+    
+    // Render Week Three Table
+    function renderWeekThreeTable() {
+        weekThreeTable.innerHTML = '';
+    
+        // Retrieve menus and students from local storage
+        const menus = JSON.parse(localStorage.getItem('menus')) || {};
+        const weekThreeMenu = menus['week3'] || {};
+        const weekThreeStudents = JSON.parse(localStorage.getItem('week3_students')) || students;
+    
+        weekThreeStudents.forEach((student, index) => {
+            const row = weekThreeTable.insertRow();
+            row.insertCell(0).textContent = student.name;
+    
+            // Dropdowns for each day
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+                const cell = row.insertCell();
+                const dayMenu = weekThreeMenu[day] || { mains: [], desserts: [] };
+    
+                const dropdownContainer = document.createElement('div');
+                dropdownContainer.className = 'dropdown-container';
+    
+                // Main dishes dropdown
+                const mainSelect = document.createElement('select');
+                mainSelect.dataset.day = day;
+                mainSelect.dataset.index = index;
+                mainSelect.dataset.type = 'main';
+                mainSelect.style.width = '80%';
+    
+                mainSelect.innerHTML = `<option value="">Select Main...</option>`;
+                dayMenu.mains.forEach(dish => {
+                    const opt = document.createElement('option');
+                    opt.value = dish;
+                    opt.textContent = dish;
+                    mainSelect.appendChild(opt);
+                });
+    
+                mainSelect.value = student[`${day}_main`] || '';
+                mainSelect.addEventListener('change', (event) => {
+                    const studentIndex = event.target.dataset.index;
+                    const day = event.target.dataset.day;
+                    weekThreeStudents[studentIndex][`${day}_main`] = event.target.value;
+                    localStorage.setItem('week3_students', JSON.stringify(weekThreeStudents));
+                    updateLiveTally3();
+                });
+    
+                // Desserts dropdown
+                const dessertSelect = document.createElement('select');
+                dessertSelect.dataset.day = day;
+                dessertSelect.dataset.index = index;
+                dessertSelect.dataset.type = 'dessert';
+                dessertSelect.style.width = '80%';
+    
+                dessertSelect.innerHTML = `<option value="">Select Dessert...</option>`;
+                dayMenu.desserts.forEach(dessert => {
+                    const opt = document.createElement('option');
+                    opt.value = dessert;
+                    opt.textContent = dessert;
+                    dessertSelect.appendChild(opt);
+                });
+    
+                dessertSelect.value = student[`${day}_dessert`] || '';
+                dessertSelect.addEventListener('change', (event) => {
+                    const studentIndex = event.target.dataset.index;
+                    const day = event.target.dataset.day;
+                    weekThreeStudents[studentIndex][`${day}_dessert`] = event.target.value;
+                    localStorage.setItem('week3_students', JSON.stringify(weekThreeStudents));
+                    updateLiveTally3();
+                });
+    
+                dropdownContainer.appendChild(mainSelect);
+                dropdownContainer.appendChild(dessertSelect);
+                cell.appendChild(dropdownContainer);
+            });
+    
+            // Add delete button
+            const actionCell = row.insertCell();
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent = 'Delete';
+            deleteButton.onclick = () => {
+                weekThreeStudents.splice(index, 1);
+                localStorage.setItem('week3_students', JSON.stringify(weekThreeStudents));
+                renderWeekThreeTable();
+                updateLiveTally3();
+            };
+            actionCell.appendChild(deleteButton);
+        });
+    }
+    
+    // Update Live Tally for Week 3
+    function updateLiveTally3() {
+        const menus = JSON.parse(localStorage.getItem('menus')) || {};
+        const weekMenu = menus.week3 || {}; // Changed to week3
+        const weekThreeStudents = JSON.parse(localStorage.getItem('week3_students')) || []; // Changed to week3_students
+    
+        const tally = {};
+    
+        // Initialize tally object with menu items for each day
+        ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+            const dayMenu = weekMenu[day] || {};
+            tally[day] = {
+                mains: {},
+                desserts: {}
+            };
+    
+            // Initialize tally counts to 0
+            dayMenu.mains.forEach(main => {
+                tally[day].mains[main] = 0;
+            });
+            dayMenu.desserts.forEach(dessert => {
+                tally[day].desserts[dessert] = 0;
+            });
+        });
+    
+        // Count selections
+        weekThreeStudents.forEach(student => {
+            ['Monday', 'Tuesday', 'Wednesday', 'Thursday'].forEach(day => {
+                const mainChoice = student[`${day}_main`];
+                const dessertChoice = student[`${day}_dessert`];
+    
+                if (mainChoice && tally[day].mains[mainChoice] !== undefined) {
+                    tally[day].mains[mainChoice]++;
+                }
+                if (dessertChoice && tally[day].desserts[dessertChoice] !== undefined) {
+                    tally[day].desserts[dessertChoice]++;
+                }
+            });
+        });
+    
+        // Generate the tally table dynamically
+        const tallyContainer = document.getElementById('tallyContainerWeekThree'); // Make sure this container exists
+        tallyContainer.innerHTML = ''; // Clear previous content
+    
+        Object.keys(tally).forEach(day => {
+            const dayTally = tally[day];
+    
+            // Create a section for each day
+            const daySection = document.createElement('div');
+            daySection.className = 'day-tally'; // Same class as previous weeks for styling
+    
+            const dayHeading = document.createElement('h3');
+            dayHeading.textContent = day;
+            daySection.appendChild(dayHeading);
+    
+            // Add mains tally
+            const mainsSection = document.createElement('div');
+            mainsSection.className = 'tally-section'; // Same class as previous weeks for styling
+            const mainsHeading = document.createElement('h4');
+            mainsHeading.textContent = 'Mains:';
+            mainsSection.appendChild(mainsHeading);
+            const mainsList = document.createElement('ul');
+            mainsList.className = 'tally-list'; // Same class as previous weeks for styling
+            Object.keys(dayTally.mains).forEach(main => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${main} <span>${dayTally.mains[main]}</span>`;
+                mainsList.appendChild(listItem);
+            });
+            mainsSection.appendChild(mainsList);
+            daySection.appendChild(mainsSection);
+    
+            // Add desserts tally
+            const dessertsSection = document.createElement('div');
+            dessertsSection.className = 'tally-section'; // Same class as previous weeks for styling
+            const dessertsHeading = document.createElement('h4');
+            dessertsHeading.textContent = 'Desserts:';
+            dessertsSection.appendChild(dessertsHeading);
+            const dessertsList = document.createElement('ul');
+            dessertsList.className = 'tally-list'; // Same class as previous weeks for styling
+            Object.keys(dayTally.desserts).forEach(dessert => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `${dessert} <span>${dayTally.desserts[dessert]}</span>`;
+                dessertsList.appendChild(listItem);
+            });
+            dessertsSection.appendChild(dessertsList);
+            daySection.appendChild(dessertsSection);
+    
+            // Append day's section to the container
+            tallyContainer.appendChild(daySection);
+        });
+    }
+    
+    
+    
+    // Print Tally for Week 3
+    document.getElementById('printTallyButtonWeekThree').addEventListener('click', () => {
+        // Retrieve stored data for Week 3
+        const menus = JSON.parse(localStorage.getItem('menus')) || {};
+        const weekMenu = menus.week3 || {}; // Get week 3 menu
+        const students = JSON.parse(localStorage.getItem('week3_students')) || []; // Get week 3 students
+        const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A';
+    
+        // Calculate tally using the shared function
+        const tally = calculateTally(weekMenu, students, swimmingClass);
+    
+        // Log the tally data to check its structure
+        console.log(tally);
+    
+        // Create printable content for Week 3
+        const printableContent = `
+            <style>
+                @page {
+                    size: A3;
+                    margin: 1cm;
+                    @top-center {
+                        content: "Tally for Week 3 - Lunches and Desserts";
+                        font-size: 16px;
+                        color: #1d3557;
+                        font-weight: bold;
+                        padding: 5px;
+                    }
+                }
+                body {
+                    font-family: Arial, sans-serif;
+                    line-height: 1.2;
+                    margin: 0;
+                    padding: 0;
+                    color: #333;
+                }
+                header {
+                    text-align: center;
+                    margin: 20px 0;
+                }
+                header h1 {
+                    font-size: 2em;
+                    color: #457b9d;
+                    margin: 0;
+                }
+                h2 {
+                    font-size: 1.5em;
+                    color: #457b9d;
+                    margin: 10px 0;
+                }
+                h3 {
+                    font-size: 1.2em;
+                    color: #1d3557;
+                    margin: 8px 0;
+                }
+                h4 {
+                    font-size: 1em;
+                    color: #457b9d;
+                    margin: 6px 0;
+                }
+                ul {
+                    list-style-type: none;
+                    padding: 0;
+                    margin: 0;
+                    font-size: 0.9em;
+                }
+                li {
+                    margin: 2px 0;
+                    padding: 4px;
+                    border-bottom: 1px solid #e63946;
+                }
+                .day-section {
+                    margin-bottom: 20px;
+                    padding: 10px;
+                    border: 1px solid #457b9d;
+                    border-radius: 5px;
+                    background: #f1faee;
+                }
+                .swimming-section {
+                    padding: 10px;
+                    border: 1px dashed #457b9d;
+                    background: #e9f5f5;
+                }
+                .column-container {
+                    display: flex;
+                    flex-wrap: wrap;
+                    gap: 10px;
+                    justify-content: space-between;
+                }
+                .column {
+                    flex: 1;
+                    min-width: calc(50% - 10px);
+                }
+            </style>
+            <header>
+                <h1>Primary Lunches Week 3</h1>
+            </header>
+            <div class="column-container">
+                ${Object.keys(tally).map(day => {
+                    const dayTally = tally[day];
+    
+                    // Ensure mains and desserts exist for each category
+                    const generalMains = dayTally.mains || {};
+                    const generalDesserts = dayTally.desserts || {};
+    
+                    const swimmingMains = dayTally.swimming && dayTally.swimming.mains ? dayTally.swimming.mains : {};
+                    const swimmingDesserts = dayTally.swimming && dayTally.swimming.desserts ? dayTally.swimming.desserts : {};
+    
+                    const nonSwimmingMains = dayTally.nonSwimming && dayTally.nonSwimming.mains ? dayTally.nonSwimming.mains : {};
+                    const nonSwimmingDesserts = dayTally.nonSwimming && dayTally.nonSwimming.desserts ? dayTally.nonSwimming.desserts : {};
+    
+                    if (day === 'Thursday') {
+                        // Special layout for Thursday (with Swimming and Non-Swimming Classes)
+                        return ` 
+                            <div class="column">
+                                <div class="day-section">
+                                    <h2>${day}</h2>
+                                    <div class="swimming-section">
+                                        <h3>Swimming Class - 12:00 Eat</h3>
+                                        <h4>Mains</h4>
+                                        <ul>
+                                            ${Object.keys(swimmingMains).length > 0 ? 
+                                              Object.keys(swimmingMains).map(main => `
+                                                <li>${main}: ${swimmingMains[main]}</li>
+                                              `).join('') : 
+                                              '<li>No mains available</li>'
+                                            }
+                                        </ul>
+                                        <h4>Desserts</h4>
+                                        <ul>
+                                            ${Object.keys(swimmingDesserts).length > 0 ? 
+                                              Object.keys(swimmingDesserts).map(dessert => `
+                                                <li>${dessert}: ${swimmingDesserts[dessert]}</li>
+                                              `).join('') : 
+                                              '<li>No desserts available</li>'
+                                            }
+                                        </ul>
+                                        <h3>Rest of Primary - Normal Time</h3>
+                                        <h4>Mains</h4>
+                                        <ul>
+                                            ${Object.keys(nonSwimmingMains).length > 0 ? 
+                                              Object.keys(nonSwimmingMains).map(main => `
+                                                <li>${main}: ${nonSwimmingMains[main]}</li>
+                                              `).join('') : 
+                                              '<li>No mains available</li>'
+                                            }
+                                        </ul>
+                                        <h4>Desserts</h4>
+                                        <ul>
+                                            ${Object.keys(nonSwimmingDesserts).length > 0 ? 
+                                              Object.keys(nonSwimmingDesserts).map(dessert => `
+                                                <li>${dessert}: ${nonSwimmingDesserts[dessert]}</li>
+                                              `).join('') : 
+                                              '<li>No desserts available</li>'
+                                            }
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        // Default layout for other days
+                        return ` 
+                            <div class="column">
+                                <div class="day-section">
+                                    <h2>${day}</h2>
+                                    <h3>Mains</h3>
+                                    <ul>
+                                        ${Object.keys(generalMains).length > 0 ? 
+                                          Object.keys(generalMains).map(main => `
+                                            <li>${main}: ${generalMains[main]}</li>
+                                          `).join('') : 
+                                          '<li>No mains available</li>'
+                                        }
+                                    </ul>
+                                    <h3>Desserts</h3>
+                                    <ul>
+                                        ${Object.keys(generalDesserts).length > 0 ? 
+                                          Object.keys(generalDesserts).map(dessert => `
+                                            <li>${dessert}: ${generalDesserts[dessert]}</li>
+                                          `).join('') : 
+                                          '<li>No desserts available</li>'
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        `;
+                    }
+                }).join('')}
+            </div>
+        `;
+    
+        // Open the print dialog
+        const printWindow = window.open('', '_blank');
+        if (printWindow) {
+            printWindow.document.body.innerHTML = printableContent;
+            printWindow.document.close();
+            printWindow.print();
+        } else {
+            alert('Unable to open print window.');
+        }
+    });
+    
+    
+    
     // Navigation to Week One
     navLinks.forEach(link => {
         link.addEventListener('click', (event) => {

@@ -455,6 +455,12 @@ input[type="text"] {
     border-radius: 5px;
 }
 
+#tallyContainerWeekThree {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px; /* Adds space between each day's section */
+}
+
 /* Styling for each day's section */
 .day-tally {
     flex: 1 1 calc(50% - 20px); /* Flexible width, adjusts to fit container */
@@ -593,4 +599,110 @@ input[type="text"] {
 
 #saveSwimmingClassButton:hover {
     background-color: #0056b3;
+}
+
+#loginPage {
+    text-align: center;
+    padding: 50px;
+}
+
+#loginForm input {
+    margin: 10px 0;
+    padding: 10px;
+    width: 80%;
+}
+
+button {
+    padding: 10px 20px;
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#loginError {
+    color: red;
+    display: none;
+}
+
+#announcementList {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.announcement-item {
+    background-color: #ffffff; /* White background for each announcement */
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    transition: all 0.3s ease;
+}
+
+.announcement-item:hover {
+    background-color: #e0f7fa; /* Light blue on hover */
+    border-color: #457b9d; /* Dark blue border on hover */
+}
+
+.announcement-text {
+    font-size: 16px;
+    color: #333; /* Dark color for text */
+    margin-right: 10px;
+    display: inline-block;
+}
+
+.announcement-button {
+    padding: 5px 10px;
+    font-size: 14px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.edit-button {
+    background-color: #457b9d; /* Dark blue for edit button */
+    color: white;
+    margin-right: 5px;
+}
+
+.delete-button {
+    background-color: #e63946; /* Red for delete button */
+    color: white;
+}
+
+.announcement-button:hover {
+    background-color: #2a4d6f; /* Darker blue for edit button on hover */
+}
+
+.delete-button:hover {
+    background-color: #d32f2f; /* Darker red for delete button on hover */
+}
+
+.announcement-item {
+    position: relative;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-family: Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.announcement-text {
+    display: block;
+    margin-bottom: 10px;
+}
+
+.announcement-timestamp {
+    position: absolute;
+    bottom: 5px;
+    right: 10px;
+    font-size: 0.8em;
+    color: #888;
 }

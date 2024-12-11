@@ -17,6 +17,7 @@
             <li><a href="#" class="nav-link" data-target="profilePage">Pupil Profiles</a></li>
             <li><a href="#" class="nav-link" data-target="weekOne">Week One</a></li>
             <li><a href="#" class="nav-link" data-target="weekTwo">Week Two</a></li>
+            <li><a href="#" class="nav-link" data-target="weekThree">Week Three</a></li>
             <li><a href="#" class="nav-link" data-target="packed-lunches">Packed Lunches</a></li>
             <li><a href="#" class="nav-link" data-target="admin">Admin</a></li>
         </ul>
@@ -118,7 +119,7 @@
         <div id="tallyContainer" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9; border-radius: 5px;">
             <h2>Live Tally</h2>
         </div>
-        <button id="printTallyButton" style="margin: 20px 0; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #4caf50; color: white; border: none; border-radius: 5px;">
+        <button id="printTallyButtonWeekOne" style="margin: 20px 0; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #4caf50; color: white; border: none; border-radius: 5px;">
             Print Tally
         </button>
 
@@ -167,6 +168,36 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Week Three Page -->
+    <div id="weekThree" class="container" style="display:none;">
+        <h1>Week Three Lunches</h1>
+
+        <!-- Tally Section -->
+        <div id="tallyContainerWeekThree" style="margin-bottom: 20px; border: 1px solid #ccc; padding: 10px; background: #f9f9f9; border-radius: 5px;">
+            <h2>Live Tally</h2>
+        </div>
+        <button id="printTallyButtonWeekThree" style="margin: 20px 0; padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #4caf50; color: white; border: none; border-radius: 5px;">
+            Print Tally
+        </button>
+
+        <!-- Table Section -->
+        <table id="weekThreeTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+    </div>
+
 
     
     <!-- Profile Page -->
@@ -310,9 +341,30 @@
                 <div class="day-menu">
                     <h3>Monday</h3>
                     <label for="week3MondayMains">Mains:</label>
-                    <input type="text" id="week3MondayMains" placeholder="Enter mains, comma-separated">
+                    <input type="text" id="week3Monday_mains" placeholder="Enter mains, comma-separated">
                     <label for="week3MondayDesserts">Desserts:</label>
-                    <input type="text" id="week3MondayDesserts" placeholder="Enter desserts, comma-separated">
+                    <input type="text" id="week3Monday_desserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <div class="day-menu">
+                    <h3>Tuesday</h3>
+                    <label for="week3TuesdayMains">Mains:</label>
+                    <input type="text" id="week3Tuesday_mains" placeholder="Enter mains, comma-separated">
+                    <label for="week3TuesdayDesserts">Desserts:</label>
+                    <input type="text" id="week3Tuesday_desserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <div class="day-menu">
+                    <h3>Wednesday</h3>
+                    <label for="week3WednesMains">Mains:</label>
+                    <input type="text" id="week3Wednesday_mains" placeholder="Enter mains, comma-separated">
+                    <label for="week3WednesdayDesserts">Desserts:</label>
+                    <input type="text" id="week3Wednesday_desserts" placeholder="Enter desserts, comma-separated">
+                </div>
+                <div class="day-menu">
+                    <h3>Thursday</h3>
+                    <label for="week3ThursdayMains">Mains:</label>
+                    <input type="text" id="week3Thursday_mains" placeholder="Enter mains, comma-separated">
+                    <label for="week3ThursdayDesserts">Desserts:</label>
+                    <input type="text" id="week3Thursday_desserts" placeholder="Enter desserts, comma-separated">
                 </div>
             </div>
             <button class="save-button" onclick="saveMenu('week3')">Save Week 3 Menu</button>

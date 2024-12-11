@@ -8,6 +8,13 @@ function saveAnnouncements(announcements) {
     localStorage.setItem('announcements', JSON.stringify(announcements));
 }
 
+// Format timestamp for display
+function formatTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+// Render the list of announcements
 // Render the list of announcements
 function renderAnnouncements() {
     const announcementList = document.getElementById('announcementList');
@@ -15,21 +22,25 @@ function renderAnnouncements() {
 
     announcementList.innerHTML = ''; // Clear the list
 
-    announcements.forEach((announcement, index) => {
+    announcements.forEach((announcementObj, index) => {
         const listItem = document.createElement('li');
-        listItem.style.marginBottom = '10px';
+        listItem.classList.add('announcement-item');
 
         const textSpan = document.createElement('span');
-        textSpan.textContent = announcement;
-        textSpan.style.marginRight = '10px';
+        textSpan.textContent = announcementObj.text;
+        textSpan.classList.add('announcement-text');
+
+        const timestampSpan = document.createElement('span');
+        timestampSpan.textContent = `Posted at: ${formatTimestamp(announcementObj.timestamp)}`;
+        timestampSpan.classList.add('announcement-timestamp'); // Added class
 
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
-        editButton.style.marginRight = '5px';
+        editButton.classList.add('announcement-button', 'edit-button');
         editButton.onclick = () => {
-            const newAnnouncement = prompt('Edit announcement:', announcement);
+            const newAnnouncement = prompt('Edit announcement:', announcementObj.text);
             if (newAnnouncement !== null) {
-                announcements[index] = newAnnouncement;
+                announcements[index].text = newAnnouncement;
                 saveAnnouncements(announcements);
                 renderAnnouncements();
                 updateHomeScreenAnnouncements();
@@ -38,6 +49,7 @@ function renderAnnouncements() {
 
         const deleteButton = document.createElement('button');
         deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('announcement-button', 'delete-button');
         deleteButton.onclick = () => {
             announcements.splice(index, 1);
             saveAnnouncements(announcements);
@@ -46,12 +58,14 @@ function renderAnnouncements() {
         };
 
         listItem.appendChild(textSpan);
+        listItem.appendChild(timestampSpan);
         listItem.appendChild(editButton);
         listItem.appendChild(deleteButton);
 
         announcementList.appendChild(listItem);
     });
 }
+
 
 // Add a new announcement
 document.getElementById('addAnnouncementButton').addEventListener('click', () => {
@@ -60,7 +74,11 @@ document.getElementById('addAnnouncementButton').addEventListener('click', () =>
 
     if (newAnnouncement) {
         const announcements = getAnnouncements();
-        announcements.push(newAnnouncement);
+        const newAnnouncementObj = {
+            text: newAnnouncement,
+            timestamp: Date.now() // Store the current time
+        };
+        announcements.push(newAnnouncementObj);
         saveAnnouncements(announcements);
         announcementInput.value = ''; // Clear the input field
         renderAnnouncements();
@@ -73,21 +91,36 @@ document.getElementById('addAnnouncementButton').addEventListener('click', () =>
 // Initialize the announcements section
 renderAnnouncements();
 
+// Render the list of announcements on the home screen
 function updateHomeScreenAnnouncements() {
     const homeAnnouncementList = document.getElementById('homeAnnouncementList');
     const announcements = JSON.parse(localStorage.getItem('announcements')) || [];
 
     homeAnnouncementList.innerHTML = ''; // Clear previous announcements
 
-    announcements.forEach(announcement => {
+    announcements.forEach(announcementObj => {
         const listItem = document.createElement('li');
-        listItem.textContent = announcement;
+        listItem.classList.add('announcement-item');
+
+        const textSpan = document.createElement('span');
+        textSpan.textContent = announcementObj.text;
+        textSpan.classList.add('announcement-text');
+
+        const timestampSpan = document.createElement('span');
+        timestampSpan.textContent = `Posted at: ${formatTimestamp(announcementObj.timestamp)}`;
+        timestampSpan.classList.add('announcement-timestamp'); // Added class for timestamp
+
+        listItem.appendChild(textSpan);
+        listItem.appendChild(timestampSpan);
+
         homeAnnouncementList.appendChild(listItem);
     });
 }
 
+
 // Load announcements on home screen load
 updateHomeScreenAnnouncements();
+
 
 
 document.getElementById('exportDataButton').addEventListener('click', () => {
@@ -159,6 +192,6 @@ const swimmingClass = localStorage.getItem('swimmingClass');
 // Example usage in a tally or rendering function
 if (swimmingClass) {
     console.log(`On Thursday, ${swimmingClass} goes swimming.`);
-    document.getElementById('swimmingClass').innerHTML = swimmingClass;
+    document.getElementById('swimmingClass').innerHTML =swimmingClass;
 }
 
