@@ -706,3 +706,19 @@ button:hover {
     font-size: 0.8em;
     color: #888;
 }
+
+/* Class-specific styles for slips */
+.slip.Lions {
+    background-color: #fff; /* Gold */
+    color: Green; /* Black text */
+}
+
+.slip.Panthers {
+    background-color: #fff; /* Orange */
+    color: black; /* White text */
+}
+
+.slip.Jaguars {
+    background-color: #fff; /* Blue Violet */
+    color: red; /* White text */
+}

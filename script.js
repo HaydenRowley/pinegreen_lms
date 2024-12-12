@@ -1781,3 +1781,89 @@ document.getElementById('printTallyButtonWeekOne').addEventListener('click', () 
             }
         });
     });
+
+    function printSlipsForDay(day, week) {
+        // Determine the correct localStorage key based on the week
+        const weekKey = week === 1 ? 'students' : `week${week}_students`;
+        const students = JSON.parse(localStorage.getItem(weekKey)) || [];
+        
+        if (students.length === 0) {
+            alert(`No student data found for Week ${week}.`);
+            return;
+        }
+    
+        // Open a new printable window
+        const printableWindow = window.open('', '_blank');
+        
+        if (!printableWindow) {
+            alert("Unable to open print window. Please check your popup blocker settings.");
+            return;
+        }
+    
+        // Write the HTML structure into the new window
+        printableWindow.document.write('<html><head><title>Slips</title><style>');
+        printableWindow.document.write(`
+            body {
+                font-family: Arial, sans-serif;
+            }
+            table {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f4f4f4;
+            }
+            .Lions td {
+                color: green;
+            }
+            .Jaguars td {
+                color: red;
+            }
+            .Panthers td {
+                color: black;
+            }
+        `);
+        printableWindow.document.write('</style></head><body>');
+    
+        // Create the table structure
+        printableWindow.document.write(`<h2>Dinners for ${day} - Week ${week}</h2>`);
+        printableWindow.document.write('<table>');
+        printableWindow.document.write(`
+            <tr>
+                <th>Name</th>
+                <th>Choice</th>
+            </tr>
+        `);
+    
+        // Populate the table with student data
+        students.forEach(student => {
+            const main = student[`${day}_main`] || "No main selected";
+            const dessert = student[`${day}_dessert`] || "No dessert selected";
+    
+            printableWindow.document.write(`
+                <tr class="${student.class}">
+                    <td>${student.name}</td>
+                    <td>${main}, ${dessert}</td>
+                </tr>
+            `);
+        });
+    
+        // Close the table
+        printableWindow.document.write('</table>');
+    
+        // Close the document and print
+        printableWindow.document.write('</body></html>');
+        printableWindow.document.close();
+        printableWindow.print();
+    }
+    
+    
+    
+    
+    
+    
