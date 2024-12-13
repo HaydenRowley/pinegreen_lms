@@ -195,3 +195,28 @@ if (swimmingClass) {
     document.getElementById('swimmingClass').innerHTML =swimmingClass;
 }
 
+document.addEventListener("DOMContentLoaded", function () {
+    const toggle = document.getElementById("darkModeToggle");
+    const body = document.body;
+    const navbar = document.querySelector(".navbar");
+    const navLinks = document.querySelectorAll(".nav-links");
+
+    // Check for saved preference
+    const isDarkMode = localStorage.getItem("darkMode") === "true";
+    if (isDarkMode) {
+        body.classList.add("dark-mode");
+        navbar.classList.add("dark-mode");
+        navLinks.forEach(link => link.classList.add("dark-mode"));
+        toggle.checked = true;
+    }
+
+    // Toggle dark mode
+    toggle.addEventListener("change", function () {
+        body.classList.toggle("dark-mode");
+        navbar.classList.toggle("dark-mode");
+        navLinks.forEach(link => link.classList.toggle("dark-mode"));
+        localStorage.setItem("darkMode", toggle.checked);
+    });
+});
+
+

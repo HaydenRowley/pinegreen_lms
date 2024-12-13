@@ -722,3 +722,87 @@ button:hover {
     background-color: #fff; /* Blue Violet */
     color: red; /* White text */
 }
+
+.snowflake {
+    position: absolute;
+    top: -50px;
+    font-size: 1.5rem; /* Adjust size of the snowflakes */
+    color: white;
+    user-select: none;
+    z-index: 9999;
+    animation: fall linear infinite;
+    opacity: 0.7; /* Add transparency */
+    transform: rotate(0deg); /* Initial rotation */
+    animation: fall linear infinite, rotate linear infinite;
+}
+
+@keyframes fall {
+    to {
+        transform: translateY(100vh);
+    }
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #1d3557; /* Dark blue from your theme */
+    color: black; /* White text */
+}
+
+.navbar.dark-mode {
+    background-color: #457b9d; /* Adjusted blue */
+}
+
+.nav-links.dark-mode a {
+    color: #f1faee;
+}
+
+/* Toggle Switch */
+.dark-mode-toggle {
+    display: flex;
+    align-items: center;
+    margin-left: 10px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 34px;
+    height: 20px;
+}
+
+.switch input {
+    display: none;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: 0.4s;
+    border-radius: 20px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: 0.4s;
+    border-radius: 50%;
+}
+
+input:checked + .slider {
+    background-color: #e63946; /* Red from your theme */
+}
+
+input:checked + .slider:before {
+    transform: translateX(14px);
+}
+
