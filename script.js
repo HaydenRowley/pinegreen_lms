@@ -1034,7 +1034,7 @@ document.getElementById('printTallyButtonWeekOne').addEventListener('click', () 
     // Retrieve stored data for Week 1
     const menus = JSON.parse(localStorage.getItem('menus')) || {};
     const weekMenu = menus.week1 || {}; // Get week 1 menu
-    const students = JSON.parse(localStorage.getItem('week1_students')) || []; // Get week 1 students
+    const students = JSON.parse(localStorage.getItem('students')) || []; // Get week 1 students
     const swimmingClass = localStorage.getItem('swimmingClass') || 'Class A';
 
     // Calculate tally using the shared function
