@@ -1,8 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
     const { jsPDF } = window.jspdf;
-
-    
-
     const lunchForm = document.getElementById('lunchForm');
     const dataTable = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
     const generateLabelsButton = document.getElementById('generateLabels');
@@ -1782,88 +1779,95 @@ document.getElementById('printTallyButtonWeekOne').addEventListener('click', () 
         });
     });
 
-    function printSlipsForDay(day, week) {
-        // Determine the correct localStorage key based on the week
-        const weekKey = week === 1 ? 'students' : `week${week}_students`;
-        const students = JSON.parse(localStorage.getItem(weekKey)) || [];
-        
-        if (students.length === 0) {
-            alert(`No student data found for Week ${week}.`);
-            return;
+function printSlipsForDay(day, week) {
+    // Determine the correct localStorage key based on the week
+    const weekKey = week === 1 ? 'students' : `week${week}_students`;
+    const students = JSON.parse(localStorage.getItem(weekKey)) || [];
+
+    if (students.length === 0) {
+        alert(`No student data found for Week ${week}.`);
+        return;
+    }
+
+    // Open a new printable window
+    const printableWindow = window.open('', '_blank');
+
+    if (!printableWindow) {
+        alert("Unable to open print window. Please check your popup blocker settings.");
+        return;
+    }
+
+    // Write the HTML structure into the new window
+    printableWindow.document.write('<html><head><title>Slips</title><style>');
+    printableWindow.document.write(`
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 14px; /* Keep original size */
+            margin: 0;
+            padding: 10px;
         }
-    
-        // Open a new printable window
-        const printableWindow = window.open('', '_blank');
-        
-        if (!printableWindow) {
-            alert("Unable to open print window. Please check your popup blocker settings.");
-            return;
+        table {
+            border-collapse: collapse;
+            width: 70%; /* Make the table skinnier */
+            max-width: 400px; /* Set a max width */
+            margin: auto; /* Center the table */
         }
-    
-        // Write the HTML structure into the new window
-        printableWindow.document.write('<html><head><title>Slips</title><style>');
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 14px; /* Maintain original size */
+            word-wrap: break-word;
+            white-space: normal;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        td.choice {
+            display: block; /* Ensures breaking into two lines */
+        }
+        .Lions td {
+            color: green;
+        }
+        .Jaguars td {
+            color: red;
+        }
+        .Panthers td {
+            color: black;
+        }
+    `);
+    printableWindow.document.write('</style></head><body>');
+
+    // Create the table structure
+    printableWindow.document.write(`<h2 style="text-align: center;">Dinners for ${day} - Week ${week}</h2>`);
+    printableWindow.document.write('<table>');
+    printableWindow.document.write(`
+        <tr>
+            <th style="width: 40%;">Name</th>
+            <th style="width: 60%;">Choice</th>
+        </tr>
+    `);
+
+    // Populate the table with student data
+    students.forEach(student => {
+        const main = student[`${day}_main`] || "No main selected";
+        const dessert = student[`${day}_dessert`] || "No dessert selected";
+
         printableWindow.document.write(`
-            body {
-                font-family: Arial, sans-serif;
-            }
-            table {
-                border-collapse: collapse;
-                width: 100%;
-            }
-            th, td {
-                border: 1px solid #ddd;
-                padding: 8px;
-                text-align: left;
-            }
-            th {
-                background-color: #f4f4f4;
-            }
-            .Lions td {
-                color: green;
-            }
-            .Jaguars td {
-                color: red;
-            }
-            .Panthers td {
-                color: black;
-            }
-        `);
-        printableWindow.document.write('</style></head><body>');
-    
-        // Create the table structure
-        printableWindow.document.write(`<h2>Dinners for ${day} - Week ${week}</h2>`);
-        printableWindow.document.write('<table>');
-        printableWindow.document.write(`
-            <tr>
-                <th>Name</th>
-                <th>Choice</th>
+            <tr class="${student.class}">
+                <td>${student.name}</td>
+                <td class="choice">${main}<br>${dessert}</td> <!-- Adds a forced line break -->
             </tr>
         `);
-    
-        // Populate the table with student data
-        students.forEach(student => {
-            const main = student[`${day}_main`] || "No main selected";
-            const dessert = student[`${day}_dessert`] || "No dessert selected";
-    
-            printableWindow.document.write(`
-                <tr class="${student.class}">
-                    <td>${student.name}</td>
-                    <td>${main}, ${dessert}</td>
-                </tr>
-            `);
-        });
-    
-        // Close the table
-        printableWindow.document.write('</table>');
-    
-        // Close the document and print
-        printableWindow.document.write('</body></html>');
-        printableWindow.document.close();
-        printableWindow.print();
-    }
-    
-    
-    
-    
-    
+    });
+
+    // Close the table
+    printableWindow.document.write('</table>');
+
+    // Close the document and print
+    printableWindow.document.write('</body></html>');
+    printableWindow.document.close();
+    printableWindow.print();
+}
+
     
